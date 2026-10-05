@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+/* Fontsource packages — served locally from node_modules */
+@import "@fontsource/cormorant-garamond/300.css";
+@import "@fontsource/cormorant-garamond/300-italic.css";
+@import "@fontsource/cormorant-garamond/400.css";
+@import "@fontsource/cormorant-garamond/400-italic.css";
+@import "@fontsource/cormorant-garamond/500.css";
+@import "@fontsource/cormorant-garamond/500-italic.css";
+@import "@fontsource/cormorant-garamond/600.css";
+@import "@fontsource/dm-sans/300.css";
+@import "@fontsource/dm-sans/400.css";
+@import "@fontsource/dm-sans/500.css";
+@import "@fontsource/dm-sans/600.css";
+@import "@fontsource/dm-mono/300.css";
+@import "@fontsource/dm-mono/400.css";
+@import "@fontsource/dm-mono/500.css";
+
+:root {
+  /* Brand Palette */
+  --ivory: #FAFAF7;
+  --cream: #F5F0E8;
+  --linen: #EDE8DC;
+  --charcoal: #1A1A18;
+  --stone: #6B6B63;
+  --gold: #B8965A;
+  --gold-light: #D4AF7A;
+  --white: #FFFFFF;
+}
+
+@theme inline {
+  /* Colors */
+  --color-ivory: #FAFAF7;
+  --color-cream: #F5F0E8;
+  --color-linen: #EDE8DC;
+  --color-charcoal: #1A1A18;
+  --color-stone: #6B6B63;
+  --color-gold: #B8965A;
+  --color-gold-light: #D4AF7A;
+  --color-white: #FFFFFF;
+
+  /* Typography */
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+}
+
+/* Override dark mode globally */
+html {
+  color-scheme: light only;
+}
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+body {
+  background-color: #FAFAF7;
+  color: #1A1A18;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Gold divider utilities */
+.gold-rule {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #B8965A 30%, #B8965A 70%, transparent 100%);
+  opacity: 0.25;
+}
+
+.gold-rule-short {
+  width: 60px;
+  height: 1px;
+  background-color: #B8965A;
+  opacity: 0.6;
+}
+
+@media (max-width: 760px) {
+  .featured-categories-container {
+    padding: 56px 16px !important;
+  }
+
+  .featured-categories-rail {
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 14px !important;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+    padding: 0 16px 12px;
+    margin-inline: -16px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .featured-categories-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .featured-categories-rail > * {
+    flex: 0 0 62vw;
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .featured-category-card {
+    aspect-ratio: 4 / 3 !important;
+  }
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection */
+::selection {
+  background-color: #EDE8DC;
+  color: #1A1A18;
+}
+
+/* Keep the hero image and copy layered together at narrow widths while
+   framing the bottle and tightening the copy to fit the viewport. */
+@media (max-width: 900px) {
+  .hero-section {
+    min-height: clamp(640px, calc(100svh - 72px), 850px);
+  }
+
+  .hero-image {
+    height: 100%;
+  }
+
+  .hero-image-element {
+    object-fit: cover;
+    object-position: 56% center;
+  }
+
+  .hero-content {
+    min-height: inherit;
+  }
+
+  .hero-copy {
+    padding: clamp(28px, 7vw, 56px) clamp(20px, 6vw, 48px);
+  }
+
+  .hero-heading {
+    font-size: clamp(2.25rem, 8vw, 4.5rem) !important;
+    max-width: 100% !important;
+    margin-bottom: 1.1rem !important;
+  }
+
+  .hero-description {
+    max-width: min(100%, 400px) !important;
+    margin-bottom: 1.4rem !important;
+  }
+
+  .hero-cta {
+    padding: 12px 24px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* Focus */
+*:focus-visible {
+  outline: 2px solid #B8965A;
+  outline-offset: 3px;
+  border-radius: 2px;
+}

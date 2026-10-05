@@ -1,0 +1,856 @@
+[
+  {
+    "id": "lumiere-doree",
+    "name": "Golden Light",
+    "subtitle": "Eau de Parfum",
+    "category": "summer",
+    "price": 285,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1541643600914-78b084683702?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1541643600914-78b084683702?w=800&q=80",
+      "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=800&q=80",
+      "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&q=80"
+    ],
+    "description": "A luminous floral amber that captures the warmth of golden light.",
+    "longDescription": "Golden Light opens with a burst of sparkling bergamot and pink pepper before revealing a heart of ylang-ylang and jasmine sambac. The dry-down is an exquisite weave of warm amber, sandalwood, and a whisper of vanilla — lingering on skin like the last rays of a summer afternoon.",
+    "notes": {
+      "top": [
+        "Bergamot",
+        "Pink Pepper",
+        "Lemon Zest"
+      ],
+      "heart": [
+        "Ylang-Ylang",
+        "Jasmine Sambac",
+        "Rose Centifolia"
+      ],
+      "base": [
+        "Amber",
+        "Sandalwood",
+        "Vanilla",
+        "White Musk"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Linalool, Limonene, Coumarin, Citronellol, Geraniol, Eugenol, Benzyl Benzoate",
+    "isBestSeller": true,
+    "isFeatured": true,
+    "rating": 4.9,
+    "reviewCount": 312,
+    "inStock": true,
+    "tags": [
+      "floral",
+      "amber",
+      "warm",
+      "feminine"
+    ]
+  },
+  {
+    "id": "sable-blanc",
+    "name": "White Sand",
+    "subtitle": "Eau de Toilette",
+    "category": "summer",
+    "price": 195,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=800&q=80",
+      "https://images.unsplash.com/photo-1541643600914-78b084683702?w=800&q=80"
+    ],
+    "description": "White sand beaches and sun-warmed skin. A summer reverie.",
+    "longDescription": "White Sand evokes the sensation of bare feet on warm white sand. Notes of coconut water and neroli open freshly before a heart of tuberose and sea salt develops. A base of driftwood and ambrette seeds leaves an effortlessly sensual trail that lingers through golden hours.",
+    "notes": {
+      "top": [
+        "Neroli",
+        "Coconut Water",
+        "Mandarin"
+      ],
+      "heart": [
+        "Tuberose",
+        "Sea Salt",
+        "Jasmine"
+      ],
+      "base": [
+        "Driftwood",
+        "Ambrette Seeds",
+        "White Amber"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Linalool, Limonene, Citronellol, Benzyl Salicylate, Hydroxycitronellal",
+    "rating": 4.7,
+    "reviewCount": 218,
+    "inStock": true,
+    "tags": [
+      "fresh",
+      "aquatic",
+      "beachy",
+      "summer"
+    ]
+  },
+  {
+    "id": "nuit-de-velours",
+    "name": "Velvet Night",
+    "subtitle": "Eau de Parfum",
+    "category": "winter",
+    "price": 320,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&q=80",
+      "https://images.unsplash.com/photo-1548369937-47519962c11a?w=800&q=80"
+    ],
+    "description": "Velvet darkness and winter spice. A fragrance for the night.",
+    "longDescription": "Velvet Night is a winter nocturne — rich, complex, and deeply sensual. Cardamom and black pepper open with authority, giving way to a heart of oud absolute and Bulgarian rose. The finish of labdanum, benzoin, and dark patchouli creates a velvety skin scent that lasts from dusk to dawn.",
+    "notes": {
+      "top": [
+        "Black Pepper",
+        "Cardamom",
+        "Saffron"
+      ],
+      "heart": [
+        "Oud Absolute",
+        "Bulgarian Rose",
+        "Incense"
+      ],
+      "base": [
+        "Labdanum",
+        "Benzoin",
+        "Dark Patchouli",
+        "Vetiver"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Linalool, Eugenol, Isoeugenol, Coumarin, Farnesol, Cinnamal",
+    "isBestSeller": true,
+    "rating": 4.8,
+    "reviewCount": 187,
+    "inStock": true,
+    "tags": [
+      "oriental",
+      "spicy",
+      "woody",
+      "winter"
+    ]
+  },
+  {
+    "id": "rose-absolue",
+    "name": "Rose Absolute",
+    "subtitle": "Eau de Parfum",
+    "category": "summer",
+    "price": 245,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1548369937-47519962c11a?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1548369937-47519962c11a?w=800&q=80",
+      "https://images.unsplash.com/photo-1541643600914-78b084683702?w=800&q=80"
+    ],
+    "description": "The purest expression of rose. Timeless, feminine, absolute.",
+    "longDescription": "Rose Absolute is a love letter to the queen of flowers. Drawing from three distinct rose varieties — Turkish rose, Bulgarian rose otto, and rose absolute — this fragrance captures every facet of rose: dewy and green at first, lush and honeyed at heart, then warm and intimate as it dries down over cashmere wood and musk.",
+    "notes": {
+      "top": [
+        "Turkish Rose",
+        "Green Leaves",
+        "Lychee"
+      ],
+      "heart": [
+        "Bulgarian Rose Otto",
+        "French Rose Absolute",
+        "Peony"
+      ],
+      "base": [
+        "Cashmere Wood",
+        "White Musk",
+        "Amber"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Citronellol, Geraniol, Linalool, Farnesol, Eugenol, Benzyl Benzoate",
+    "isBestSeller": true,
+    "isFeatured": true,
+    "rating": 4.9,
+    "reviewCount": 445,
+    "inStock": true,
+    "tags": [
+      "floral",
+      "rose",
+      "romantic",
+      "feminine"
+    ]
+  },
+  {
+    "id": "bois-sacre",
+    "name": "Sacred Wood",
+    "subtitle": "Eau de Parfum Intense",
+    "category": "winter",
+    "price": 380,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=800&q=80",
+      "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&q=80"
+    ],
+    "description": "Ancient woods and sacred resins. A meditation in fragrance.",
+    "longDescription": "Sacred Wood is inspired by the stillness of ancient forests and the smoke of sacred rituals. Frankincense and elemi open with an almost edible quality before the heart reveals aged cedarwood and gaïac wood. A deep base of castoreum, leather, and oakmoss creates an extraordinary silage — profound, timeless, and utterly unforgettable.",
+    "notes": {
+      "top": [
+        "Frankincense",
+        "Elemi",
+        "Pink Pepper"
+      ],
+      "heart": [
+        "Cedarwood",
+        "Gaïac Wood",
+        "Cypress"
+      ],
+      "base": [
+        "Oakmoss",
+        "Leather",
+        "Castoreum",
+        "Vetiver"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Linalool, Limonene, Coumarin, Atranol, Chloroatranol, Farnesol",
+    "isBestSeller": true,
+    "rating": 4.8,
+    "reviewCount": 156,
+    "inStock": true,
+    "tags": [
+      "woody",
+      "resinous",
+      "smoky",
+      "unisex"
+    ]
+  },
+  {
+    "id": "sel-de-mer",
+    "name": "Sea Salt",
+    "subtitle": "Eau de Cologne",
+    "category": "summer",
+    "price": 165,
+    "size": "100ml",
+    "image": "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800&q=80",
+      "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=800&q=80"
+    ],
+    "description": "Ocean breeze and sea spray. The freedom of open water.",
+    "longDescription": "Sea Salt captures the exhilarating rush of sea air. An opening of ozone and cold sea spray gives way to aromatic marine lavender and driftwood heart. The skin-close dry down of mineral musks and salted woods makes this the ideal fragrance for warm days when you need to feel alive.",
+    "notes": {
+      "top": [
+        "Ozone",
+        "Sea Spray",
+        "Bergamot"
+      ],
+      "heart": [
+        "Marine Lavender",
+        "Driftwood",
+        "Clary Sage"
+      ],
+      "base": [
+        "Mineral Musk",
+        "Salted Wood",
+        "Ambergris"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Linalool, Limonene, Citronellol, Coumarin, Geraniol",
+    "rating": 4.6,
+    "reviewCount": 203,
+    "inStock": true,
+    "tags": [
+      "fresh",
+      "marine",
+      "aquatic",
+      "unisex"
+    ]
+  },
+  {
+    "id": "ambre-pur",
+    "name": "Pure Amber",
+    "subtitle": "Eau de Parfum",
+    "category": "winter",
+    "price": 210,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=800&q=80",
+      "https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=800&q=80"
+    ],
+    "description": "Warm amber and golden spice. Pure liquid comfort.",
+    "longDescription": "Pure Amber is a masterclass in warmth. Opening with a hint of cardamom and clove, the fragrance quickly settles into a glowing heart of labdanum absolute and sweet orange blossom. The lingering base of benzoin, vanilla absolute, and tonka bean makes this the most comforting scent in our collection — a warm embrace in a bottle.",
+    "notes": {
+      "top": [
+        "Cardamom",
+        "Clove",
+        "Mandarin"
+      ],
+      "heart": [
+        "Labdanum Absolute",
+        "Orange Blossom",
+        "Cinnamon"
+      ],
+      "base": [
+        "Benzoin",
+        "Vanilla Absolute",
+        "Tonka Bean",
+        "Musk"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Linalool, Coumarin, Eugenol, Limonene, Isoeugenol, Benzyl Benzoate",
+    "isBestSeller": true,
+    "isFeatured": true,
+    "rating": 4.8,
+    "reviewCount": 389,
+    "inStock": true,
+    "tags": [
+      "amber",
+      "warm",
+      "sweet",
+      "oriental"
+    ]
+  },
+  {
+    "id": "fleur-de-coton",
+    "name": "Cotton Flower",
+    "subtitle": "Eau de Toilette",
+    "category": "summer",
+    "price": 145,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1590156206657-aec5e3e31fbe?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1590156206657-aec5e3e31fbe?w=800&q=80",
+      "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800&q=80"
+    ],
+    "description": "Clean cotton and fresh air. Effortless, everyday elegance.",
+    "longDescription": "Cotton Flower evokes the simple pleasure of freshly laundered linen drying in a gentle breeze. White musk and clean aldehydes open crisply, supported by a delicate heart of iris, white peony, and soft violet leaf. The base is pure comfort — warm skin musk and a whisper of cedarwood.",
+    "notes": {
+      "top": [
+        "Aldehydes",
+        "Green Leaves",
+        "Lemon"
+      ],
+      "heart": [
+        "Iris",
+        "White Peony",
+        "Violet Leaf"
+      ],
+      "base": [
+        "White Musk",
+        "Cedarwood",
+        "Skin Musk"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Linalool, Hydroxycitronellal, Citronellol, Geraniol, Benzyl Alcohol",
+    "isNew": true,
+    "rating": 4.5,
+    "reviewCount": 167,
+    "inStock": true,
+    "tags": [
+      "clean",
+      "fresh",
+      "floral",
+      "everyday"
+    ]
+  },
+  {
+    "id": "encens-royal",
+    "name": "Royal Incense",
+    "subtitle": "Eau de Parfum",
+    "category": "winter",
+    "price": 295,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&q=80",
+      "https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=800&q=80"
+    ],
+    "description": "Royal incense and ancient myrrh. Majestic and enduring.",
+    "longDescription": "Royal Incense is a tribute to the ancient art of incense burning. Ethiopian frankincense and Omani myrrh dominate the opening, creating a cloud of sacred smoke. Rose and orris appear in the heart, lending feminine complexity. The base of cistus, oud wood, and dark amber ensures an extraordinary presence on the skin for hours.",
+    "notes": {
+      "top": [
+        "Frankincense",
+        "Myrrh",
+        "Black Pepper"
+      ],
+      "heart": [
+        "Rose",
+        "Orris Butter",
+        "Cinnamon"
+      ],
+      "base": [
+        "Cistus",
+        "Oud Wood",
+        "Dark Amber",
+        "Sandalwood"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Linalool, Farnesol, Coumarin, Eugenol, Cinnamal, Limonene",
+    "isNew": true,
+    "rating": 4.7,
+    "reviewCount": 132,
+    "inStock": true,
+    "tags": [
+      "incense",
+      "oriental",
+      "smoky",
+      "luxury"
+    ]
+  },
+  {
+    "id": "jardin-secret",
+    "name": "Secret Garden",
+    "subtitle": "Eau de Parfum",
+    "category": "summer",
+    "price": 175,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1600612253971-7b8b2ab47e36?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1600612253971-7b8b2ab47e36?w=800&q=80",
+      "https://images.unsplash.com/photo-1590156206657-aec5e3e31fbe?w=800&q=80"
+    ],
+    "description": "A hidden garden in full bloom. Green, alive, and fleeting.",
+    "longDescription": "Step through an old wooden gate into Secret Garden — a private garden where everything is in bloom at once. Tomato leaf and green violet open with a startling freshness before a lush heart of rose, peony, and sweet pea emerges. The base of wet earth and soft woods captures the garden at dusk, after rain.",
+    "notes": {
+      "top": [
+        "Tomato Leaf",
+        "Green Violet",
+        "Bergamot"
+      ],
+      "heart": [
+        "Rose",
+        "Peony",
+        "Sweet Pea"
+      ],
+      "base": [
+        "Wet Earth",
+        "Oakwood",
+        "White Musk"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Linalool, Citronellol, Geraniol, Farnesol, Hydroxycitronellal",
+    "isNew": true,
+    "rating": 4.6,
+    "reviewCount": 48,
+    "inStock": true,
+    "tags": [
+      "green",
+      "floral",
+      "fresh",
+      "nature"
+    ]
+  },
+  {
+    "id": "cedre-iris",
+    "name": "Cedar & Iris",
+    "subtitle": "Eau de Parfum",
+    "category": "winter",
+    "price": 225,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1512207736890-6ffed8a84e8d?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1512207736890-6ffed8a84e8d?w=800&q=80",
+      "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&q=80"
+    ],
+    "description": "Powdery iris and atlas cedar. Architectural, precise, elegant.",
+    "longDescription": "Cedar & Iris is an exercise in elegant restraint. The opening is a clean, slightly powdery iris absolute — almost violet, almost root — that deepens over time into a heart of heliotrope and orris butter. Atlas cedarwood and amyris in the base provide a warm, slightly creamy structure that supports the iris without overwhelming it.",
+    "notes": {
+      "top": [
+        "Iris Absolute",
+        "Galbanum",
+        "Bergamot"
+      ],
+      "heart": [
+        "Heliotrope",
+        "Orris Butter",
+        "Violet"
+      ],
+      "base": [
+        "Atlas Cedarwood",
+        "Amyris",
+        "White Musk"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Linalool, Hydroxycitronellal, Coumarin, Citronellol, Geraniol",
+    "isNew": true,
+    "rating": 4.7,
+    "reviewCount": 63,
+    "inStock": true,
+    "tags": [
+      "powdery",
+      "woody",
+      "iris",
+      "unisex"
+    ]
+  },
+  {
+    "id": "petale-dore",
+    "name": "Golden Petal",
+    "subtitle": "Eau de Parfum",
+    "category": "summer",
+    "price": 260,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=800&q=80",
+      "https://images.unsplash.com/photo-1548369937-47519962c11a?w=800&q=80"
+    ],
+    "description": "Golden petals and honey. The sweetest luxury.",
+    "longDescription": "Golden Petal is an ode to the sensuality of flowers steeped in golden honey. Opening with a champagne-like fizz of peach and osmanthus, the fragrance unfolds into a heart of mimosa absolute and honeyed rose. The base of beeswax, sandalwood, and cashmere creates an extraordinarily skin-like warmth.",
+    "notes": {
+      "top": [
+        "Osmanthus",
+        "Peach",
+        "Bergamot"
+      ],
+      "heart": [
+        "Mimosa Absolute",
+        "Rose",
+        "Honey"
+      ],
+      "base": [
+        "Beeswax",
+        "Sandalwood",
+        "Cashmere",
+        "Musk"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Farnesol, Benzyl Benzoate, Linalool, Citronellol, Geraniol, Eugenol",
+    "isBestSeller": true,
+    "rating": 4.8,
+    "reviewCount": 271,
+    "inStock": true,
+    "tags": [
+      "floral",
+      "sweet",
+      "honey",
+      "feminine"
+    ]
+  },
+  {
+    "id": "aqua-lumiere",
+    "name": "Aqua Light",
+    "subtitle": "Eau de Cologne",
+    "category": "summer",
+    "price": 155,
+    "size": "100ml",
+    "image": "https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?w=800&q=80",
+      "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800&q=80"
+    ],
+    "description": "Light on water. An instant feeling of clarity and calm.",
+    "longDescription": "Aqua Light is the lightest fragrance in our collection — a luminous splash of citrus and aquatic notes that lifts the spirits immediately. Sicilian lemon and grapefruit sparkle over a fresh heart of water lily and green tea. The dry down of white woods and mineral musks is clean, bright, and effortlessly wearable.",
+    "notes": {
+      "top": [
+        "Sicilian Lemon",
+        "Grapefruit",
+        "Bergamot"
+      ],
+      "heart": [
+        "Water Lily",
+        "Green Tea",
+        "Cucumber"
+      ],
+      "base": [
+        "White Woods",
+        "Mineral Musk",
+        "Ambergris"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Limonene, Linalool, Citronellol, Benzyl Salicylate, Coumarin",
+    "rating": 4.5,
+    "reviewCount": 144,
+    "inStock": true,
+    "tags": [
+      "aquatic",
+      "citrus",
+      "fresh",
+      "light"
+    ]
+  },
+  {
+    "id": "oud-imperial",
+    "name": "Royal Oud",
+    "subtitle": "Extrait de Parfum",
+    "category": "winter",
+    "price": 420,
+    "size": "30ml",
+    "image": "https://images.unsplash.com/photo-1493813931589-a2b5bfcbbf56?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1493813931589-a2b5bfcbbf56?w=800&q=80",
+      "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&q=80"
+    ],
+    "description": "Our most prestigious creation. Rare oud and imperial gold.",
+    "longDescription": "Royal Oud represents the pinnacle of our craft. Built around a rare Cambodian oud absolute of extraordinary quality, this extrait opens with a burst of saffron and rose before the oud unfolds in all its complexity — dark, leathery, and slightly sweet. Aged sandalwood, pure labdanum, and a whisper of smoke complete this imperial statement.",
+    "notes": {
+      "top": [
+        "Saffron",
+        "Rose",
+        "Nutmeg"
+      ],
+      "heart": [
+        "Cambodian Oud Absolute",
+        "Bulgarian Rose",
+        "Amber"
+      ],
+      "base": [
+        "Aged Sandalwood",
+        "Labdanum",
+        "Smoke",
+        "Leather"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Farnesol, Linalool, Eugenol, Coumarin, Isoeugenol, Cinnamal",
+    "isBestSeller": true,
+    "isFeatured": true,
+    "rating": 4.9,
+    "reviewCount": 98,
+    "inStock": true,
+    "tags": [
+      "oud",
+      "luxury",
+      "oriental",
+      "precious"
+    ]
+  },
+  {
+    "id": "musc-celeste",
+    "name": "Celestial Musk",
+    "subtitle": "Eau de Parfum",
+    "category": "summer",
+    "price": 185,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1519940791965-b2d688f7b62f?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1519940791965-b2d688f7b62f?w=800&q=80",
+      "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=800&q=80"
+    ],
+    "description": "Clean, celestial, close to skin. The scent of pure grace.",
+    "longDescription": "Celestial Musk is an exploration of the musk family — not the heavy, animalic musks of old, but the clean, ethereal musks discovered in the last decades of perfumery. Bright ambrette seed and airy cashmeran open over a transparent heart of Clearwood and white musk before settling into a barely-there skin scent that enhances rather than covers.",
+    "notes": {
+      "top": [
+        "Ambrette Seed",
+        "White Pepper",
+        "Neroli"
+      ],
+      "heart": [
+        "Clearwood",
+        "White Musk",
+        "Iris"
+      ],
+      "base": [
+        "Cashmeran",
+        "Skin Musk",
+        "Sandalwood"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Linalool, Hydroxycitronellal, Citronellol, Coumarin, Benzyl Salicylate",
+    "isNew": true,
+    "rating": 4.6,
+    "reviewCount": 55,
+    "inStock": true,
+    "tags": [
+      "musk",
+      "clean",
+      "airy",
+      "unisex"
+    ]
+  },
+  {
+    "id": "duo-estival",
+    "name": "Summer Duo",
+    "subtitle": "Gift Set — 2 × 30ml",
+    "category": "bundle",
+    "price": 290,
+    "originalPrice": 340,
+    "size": "2 × 30ml",
+    "image": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&q=80",
+      "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=800&q=80"
+    ],
+    "description": "White Sand and Aqua Light together. The summer duo.",
+    "longDescription": "The Summer Duo pairs our two defining summer fragrances in a beautifully presented gift set. White Sand for evenings — warmer, more sensual. Aqua Light for mornings — bright and invigorating. Together they capture the full spectrum of summer light, from the first cool hour to the last warm breath of the day.",
+    "notes": {
+      "top": [
+        "See individual fragrances"
+      ],
+      "heart": [
+        "White Sand + Aqua Light"
+      ],
+      "base": [
+        "See individual fragrances"
+      ]
+    },
+    "ingredients": "See individual fragrances",
+    "isFeatured": true,
+    "rating": 4.7,
+    "reviewCount": 89,
+    "inStock": true,
+    "tags": [
+      "gift",
+      "bundle",
+      "summer",
+      "duo"
+    ]
+  },
+  {
+    "id": "collection-hivernal",
+    "name": "Winter Collection",
+    "subtitle": "Gift Set — 3 × 30ml",
+    "category": "bundle",
+    "price": 540,
+    "originalPrice": 660,
+    "size": "3 × 30ml",
+    "image": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800&q=80",
+      "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&q=80"
+    ],
+    "description": "Three winter masterpieces. The complete cold-weather collection.",
+    "longDescription": "The Winter Collection brings together our three most acclaimed winter fragrances — Velvet Night, Royal Incense, and Sacred Wood — in an exquisite presentation box. Each bottle is 30ml, perfect for alternating through the winter season according to occasion and mood. An ideal gift for those who understand true luxury.",
+    "notes": {
+      "top": [
+        "See individual fragrances"
+      ],
+      "heart": [
+        "Velvet Night + Royal Incense + Sacred Wood"
+      ],
+      "base": [
+        "See individual fragrances"
+      ]
+    },
+    "ingredients": "See individual fragrances",
+    "rating": 4.9,
+    "reviewCount": 72,
+    "inStock": true,
+    "tags": [
+      "gift",
+      "bundle",
+      "winter",
+      "collection"
+    ]
+  },
+  {
+    "id": "citrus-vetiver",
+    "name": "Citrus & Vetiver",
+    "subtitle": "Eau de Toilette",
+    "category": "summer",
+    "price": 135,
+    "size": "100ml",
+    "image": "https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=800&q=80",
+      "https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?w=800&q=80"
+    ],
+    "description": "The classic gentleman's summer. Bright citrus, grounded vetiver.",
+    "longDescription": "Citrus & Vetiver is the quintessential warm-weather fragrance for those who prefer their elegance understated. A vivid opening of lime, grapefruit, and neroli gives way to a refined heart of petit grain and rosemary before Haitian vetiver — earthy, smoky, slightly green — grounds the composition with remarkable authority.",
+    "notes": {
+      "top": [
+        "Lime",
+        "Grapefruit",
+        "Neroli"
+      ],
+      "heart": [
+        "Petit Grain",
+        "Rosemary",
+        "Geranium"
+      ],
+      "base": [
+        "Haitian Vetiver",
+        "Oakmoss",
+        "White Musk"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Limonene, Linalool, Citronellol, Geraniol, Coumarin",
+    "rating": 4.6,
+    "reviewCount": 198,
+    "inStock": true,
+    "tags": [
+      "citrus",
+      "woody",
+      "fresh",
+      "masculine"
+    ]
+  },
+  {
+    "id": "vanille-noire",
+    "name": "Dark Vanilla",
+    "subtitle": "Eau de Parfum",
+    "category": "winter",
+    "price": 240,
+    "size": "50ml",
+    "image": "https://images.unsplash.com/photo-1580552833071-89c80ef0e6fc?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1580552833071-89c80ef0e6fc?w=800&q=80",
+      "https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=800&q=80"
+    ],
+    "description": "Dark vanilla and smoked wood. Seductive. Mysterious. Memorable.",
+    "longDescription": "Dark Vanilla turns the familiar comfort of vanilla on its head. Where most vanillas are sweet and simple, this one is complex and slightly dark. Opening with smoked rum and black cardamom, the fragrance reveals its warm vanilla heart only gradually — Tahitian vanilla absolute bolstered by dark benzoin and guaiac wood. The result is hypnotic.",
+    "notes": {
+      "top": [
+        "Smoked Rum",
+        "Black Cardamom",
+        "Saffron"
+      ],
+      "heart": [
+        "Tahitian Vanilla Absolute",
+        "Dark Benzoin",
+        "Heliotrope"
+      ],
+      "base": [
+        "Guaiac Wood",
+        "Labdanum",
+        "Patchouli",
+        "Ambergris"
+      ]
+    },
+    "ingredients": "Alcohol, Aqua, Parfum, Coumarin, Linalool, Benzyl Benzoate, Farnesol, Eugenol, Cinnamal",
+    "isBestSeller": true,
+    "rating": 4.8,
+    "reviewCount": 234,
+    "inStock": true,
+    "tags": [
+      "vanilla",
+      "sweet",
+      "smoky",
+      "winter"
+    ]
+  },
+  {
+    "id": "signature-set",
+    "name": "Signature Set",
+    "subtitle": "Prestige Set — 5 × 15ml",
+    "category": "bundle",
+    "price": 680,
+    "originalPrice": 820,
+    "size": "5 × 15ml",
+    "image": "https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=800&q=80",
+      "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&q=80"
+    ],
+    "description": "Five icons. One prestige set. The definitive WAQAR experience.",
+    "longDescription": "The Signature Set is our most prestigious offering — five of WAQAR's most iconic fragrances, each in a 15ml travel flacon presented in a handmade lacquered box. Includes: Golden Light, Rose Absolute, Pure Amber, Sacred Wood, and Royal Oud. A statement gift. An invitation to explore.",
+    "notes": {
+      "top": [
+        "See individual fragrances"
+      ],
+      "heart": [
+        "Five iconic WAQAR fragrances"
+      ],
+      "base": [
+        "See individual fragrances"
+      ]
+    },
+    "ingredients": "See individual fragrances",
+    "isBestSeller": true,
+    "isFeatured": true,
+    "rating": 5,
+    "reviewCount": 41,
+    "inStock": true,
+    "tags": [
+      "gift",
+      "bundle",
+      "prestige",
+      "collection"
+    ]
+  }
+]

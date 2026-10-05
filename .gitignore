@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+build
+coverage
+*.tsbuildinfo
+.env*
+!.env.example
+
+# Local IDE / temporary files
+.cursor/
+.agents/
+tmp-*.js
+*.tsbuildinfo

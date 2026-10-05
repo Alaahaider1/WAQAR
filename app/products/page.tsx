@@ -1,0 +1,21 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import ProductsPageClient from "./ProductsPageClient";
+import { createServerClient } from "@/src/lib/supabase/server";
+import { CategoryRepository } from "@/src/repositories/category.repository";
+
+export const metadata: Metadata = {
+  title: "Collections",
+  description:
+    "Explore WAQAR's complete collection of luxury fragrances. Filter by season, category, and price to find your perfect scent.",
+};
+
+export default async function ProductsPage() {
+  const supabase = await createServerClient();
+  const categories = await new CategoryRepository(supabase).findAll();
+  return (
+    <Suspense fallback={<div style={{ paddingTop: 160, textAlign: "center", fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#6B6B63" }}>Loading…</div>}>
+      <ProductsPageClient categories={categories.map((category) => ({ id: category.slug, label: category.name }))} />
+    </Suspense>
+  );
+}
