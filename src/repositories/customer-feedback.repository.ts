@@ -13,10 +13,10 @@ function mapImage(row: CustomerFeedbackImageRow): CustomerFeedbackImage {
 
 export class CustomerFeedbackRepository extends BaseRepository {
   async findVisible(): Promise<CustomerFeedbackImage[]> {
-    const { data, error } = await this.db.from('customer_feedback_images').select('*').eq('is_visible', true).order('position').order('created_at');
+    const { data, error } = await this.db.from('customer_feedback_images').select('id, image_url, storage_path, position, is_visible, created_at, updated_at').eq('is_visible', true).order('position').order('created_at');
     if (error && (error as { code?: string }).code === 'PGRST205') return [];
     if (error) throw toWaqarError(error, 'CustomerFeedbackRepository.findVisible');
-    return (data ?? []).map(mapImage);
+    return ((data ?? []) as unknown as CustomerFeedbackImageRow[]).map(mapImage);
   }
 
   async findAll(): Promise<CustomerFeedbackImage[]> {

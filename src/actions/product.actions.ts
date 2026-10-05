@@ -4,7 +4,7 @@
 
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { requireAdmin } from '@/src/lib/auth/guards';
 import { createAdminClient } from '@/src/lib/supabase/admin';
 import { ProductRepository } from '@/src/repositories/product.repository';
@@ -19,6 +19,7 @@ type AdminProductPayload = {
 };
 
 function revalidateProducts(slug?: string) {
+  updateTag('storefront-catalog');
   revalidatePath('/products', 'page');
   revalidatePath('/admin/products', 'page');
   revalidatePath('/', 'page');

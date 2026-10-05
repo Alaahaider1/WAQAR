@@ -23,10 +23,13 @@ const S = {
 export function CartClient() {
   const { items: storedItems, removeItem, updateQuantity } = useCartStore();
   const catalogProducts = useCatalogProducts();
-  const productsById = new Map(catalogProducts.map((product) => [product.id, product]));
+  const productsById = new Map(catalogProducts.flatMap((product) => [
+    [product.databaseId, product] as const,
+    [product.id, product] as const, // resolve legacy carts that stored slugs
+  ]));
   const items = storedItems.flatMap((item) => {
     const product = productsById.get(item.productId);
-    return product ? [{ product, quantity: item.quantity }] : [];
+    return product ? [{ product, quantity: item.quantity, cartProductId: item.productId }] : [];
   });
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number; label: string } | null>(null);
@@ -143,11 +146,11 @@ export function CartClient() {
 
                     {/* Qty */}
                     <div style={{ display: "flex", alignItems: "center", border: "1px solid #EDE8DC", width: 128 }}>
-                      <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} style={{ width: 36, height: 38, background: "none", border: "none", cursor: "pointer", color: "#6B6B63", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <button onClick={() => updateQuantity(item.cartProductId, item.quantity - 1)} style={{ width: 36, height: 38, background: "none", border: "none", cursor: "pointer", color: "#6B6B63", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <Minus size={11} strokeWidth={1.5} />
                       </button>
                       <span style={{ flex: 1, textAlign: "center", ...S.mono, fontSize: 12, color: "#1A1A18", borderLeft: "1px solid #EDE8DC", borderRight: "1px solid #EDE8DC", lineHeight: "38px" }}>{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} style={{ width: 36, height: 38, background: "none", border: "none", cursor: "pointer", color: "#6B6B63", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <button onClick={() => updateQuantity(item.cartProductId, item.quantity + 1)} style={{ width: 36, height: 38, background: "none", border: "none", cursor: "pointer", color: "#6B6B63", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <Plus size={11} strokeWidth={1.5} />
                       </button>
                     </div>
@@ -159,7 +162,7 @@ export function CartClient() {
                     </div>
 
                     {/* Remove */}
-                    <button onClick={() => removeItem(item.product.id)}
+                    <button onClick={() => removeItem(item.cartProductId)}
                       style={{ width: 28, height: 28, background: "none", border: "none", cursor: "pointer", color: "#6B6B63", display: "flex", alignItems: "center", justifyContent: "center", transition: "color 0.2s" }}
                       onMouseEnter={e => (e.currentTarget.style.color = "#1A1A18")}
                       onMouseLeave={e => (e.currentTarget.style.color = "#6B6B63")}

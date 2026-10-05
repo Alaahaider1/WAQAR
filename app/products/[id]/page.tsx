@@ -5,8 +5,6 @@ import ProductDetailClient from "./ProductDetailClient";
 
 type Props = { params: Promise<{ id: string }> };
 
-export const dynamic = "force-dynamic";
-
 export async function generateStaticParams() {
   try {
     const slugs = await fetchPublishedSlugs();

@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { requireAdmin } from '@/src/lib/auth/guards';
 import { createAdminClient } from '@/src/lib/supabase/admin';
 import { CategoryRepository } from '@/src/repositories/category.repository';
@@ -26,6 +26,8 @@ function categoryStoragePath(imageUrl: string | null): string | null {
 }
 
 function revalidate() {
+  updateTag('storefront-catalog');
+  updateTag('storefront-categories');
   revalidatePath('/admin/categories', 'page');
   revalidatePath('/products', 'page');
   revalidatePath('/', 'page');

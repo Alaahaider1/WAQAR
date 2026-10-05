@@ -1,11 +1,8 @@
-import { createServerClient } from "@/src/lib/supabase/server";
-import { CategoryRepository } from "@/src/repositories/category.repository";
+import { fetchFeaturedCategories } from "@/lib/catalog/server";
 import { FeaturedCategoriesClient } from "./FeaturedCategoriesClient";
 
 export async function FeaturedCategories() {
-  const supabase = await createServerClient();
-  const repository = new CategoryRepository(supabase);
-  const categories = await repository.findFeatured();
+  const categories = await fetchFeaturedCategories();
 
   return (
     <FeaturedCategoriesClient

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -58,7 +58,10 @@ function FormField({ field, value, error, onChange }: { field: Field; value: str
 export function CheckoutClient() {
   const { items: storedItems, clearCart } = useCartStore();
   const catalogProducts = useCatalogProducts();
-  const productsById = new Map(catalogProducts.map((product) => [product.id, product]));
+  const productsById = new Map(catalogProducts.flatMap((product) => [
+    [product.databaseId, product] as const,
+    [product.id, product] as const, // resolve legacy carts that stored slugs
+  ]));
   const items = storedItems.flatMap((item) => {
     const product = productsById.get(item.productId);
     return product ? [{ product, quantity: item.quantity }] : [];
@@ -70,6 +73,7 @@ export function CheckoutClient() {
   const [orderOpen, setOrderOpen] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const submitting = useRef(false);
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const shipping = subtotal >= 150 ? 0 : 12;
@@ -96,8 +100,9 @@ export function CheckoutClient() {
       return;
     }
 
-    if (!validate()) return;
+    if (submitting.current || !validate()) return;
 
+    submitting.current = true;
     setLoading(true);
     try {
       const result = await placeOrderAction({
@@ -116,11 +121,7 @@ export function CheckoutClient() {
         shipping,
         total,
         items: items.map((item) => ({
-          id: item.product.id,
-          name: item.product.name,
-          size: item.product.size,
-          image: item.product.image,
-          price: item.product.price,
+          id: item.product.databaseId,
           quantity: item.quantity,
         })),
       });
@@ -145,6 +146,7 @@ export function CheckoutClient() {
     } catch (error) {
       console.error(error);
     } finally {
+      submitting.current = false;
       setLoading(false);
     }
   };

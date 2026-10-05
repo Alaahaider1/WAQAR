@@ -10,7 +10,7 @@ export type CartItem = {
 
 type CartStore = {
   items: CartItem[];
-  addItem: (product: Pick<Product, "id">, quantity?: number) => void;
+  addItem: (product: Pick<Product, "id" | "databaseId">, quantity?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -27,6 +27,8 @@ const isQuotaExceededError = (error: unknown) => {
     storageError?.code === 1014
   );
 };
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const cartStorage: StateStorage = {
   getItem: (name) => window.localStorage.getItem(name),
@@ -84,19 +86,22 @@ export const useCartStore = create<CartStore>()(
       items: [],
 
       addItem: (product, quantity = 1) => {
+        if (!UUID_PATTERN.test(product.databaseId)) return;
         if (!Number.isFinite(quantity) || quantity < 1) return;
         set((state) => {
-          const existing = state.items.find((item) => item.productId === product.id);
+          const existing = state.items.find((item) =>
+            item.productId === product.databaseId || item.productId === product.id
+          );
           if (existing) {
             return {
               items: state.items.map((item) =>
-                item.productId === product.id
-                  ? { ...item, quantity: item.quantity + Math.floor(quantity) }
+                item.productId === product.databaseId || item.productId === product.id
+                  ? { ...item, productId: product.databaseId, quantity: item.quantity + Math.floor(quantity) }
                   : item
               ),
             };
           }
-          return { items: [...state.items, { productId: product.id, quantity: Math.floor(quantity) }] };
+          return { items: [...state.items, { productId: product.databaseId, quantity: Math.floor(quantity) }] };
         });
       },
 

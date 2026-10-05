@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { PlaceOrderSchema, priceCheckoutItems } from '../src/lib/security/checkout.ts';
+import { rowToStorefrontProduct } from '../lib/catalog/mapProduct.ts';
 import { BostaShippingService } from '../src/services/shipping.service.ts';
 
 const productId = 'a1b2c3d4-e5f6-4789-8123-456789abcdef';
@@ -32,6 +33,40 @@ test('checkout rejects unavailable products and invalid quantities', () => {
   const parsed = PlaceOrderSchema.parse(request);
   assert.throws(() => priceCheckoutItems(parsed.items, []), /no longer available/);
   assert.equal(PlaceOrderSchema.safeParse({ ...request, items: [{ id: productId, quantity: -1 }] }).success, false);
+});
+
+test('storefront products keep the URL slug separate from the database UUID used by checkout', () => {
+  const storefrontProduct = rowToStorefrontProduct({
+    id: productId,
+    slug: 'waqar-signature',
+    name: 'WAQAR Signature',
+    subtitle: 'Eau de Parfum',
+    category_slug: 'summer',
+    default_variant_price: 200,
+    base_price: 200,
+    compare_at_price: null,
+    default_variant_size: '50ml',
+    primary_image_url: null,
+    description: '',
+    is_best_seller: false,
+    is_new: false,
+    is_featured: false,
+    rating: 0,
+    review_count: 0,
+    available_quantity: 1,
+    allow_backorder: false,
+  });
+
+  assert.equal(storefrontProduct.id, 'waqar-signature');
+  assert.equal(storefrontProduct.databaseId, productId);
+  assert.equal(PlaceOrderSchema.safeParse({
+    ...request,
+    items: [{ id: storefrontProduct.databaseId, quantity: 1 }],
+  }).success, true);
+  assert.equal(PlaceOrderSchema.safeParse({
+    ...request,
+    items: [{ id: storefrontProduct.id, quantity: 1 }],
+  }).success, false);
 });
 
 test('shipping client rejects non-Bosta and private destinations', () => {

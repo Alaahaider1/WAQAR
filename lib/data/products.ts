@@ -10,6 +10,8 @@ export type FragranceNote = {
 };
 
 export type Product = {
+  /** Database UUID for foreign-key writes. Keep `id` as the storefront slug. */
+  databaseId: string;
   id: string;
   name: string;
   subtitle: string;

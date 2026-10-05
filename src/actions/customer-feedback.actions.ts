@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { requireAdmin } from '@/src/lib/auth/guards';
 import { createAdminClient } from '@/src/lib/supabase/admin';
 import { CustomerFeedbackRepository } from '@/src/repositories/customer-feedback.repository';
@@ -10,7 +10,7 @@ import type { CustomerFeedbackImage } from '@/src/types/domain';
 
 const BUCKET = 'customer-feedback';
 
-function revalidate() { revalidatePath('/admin/settings', 'page'); revalidatePath('/', 'page'); }
+function revalidate() { updateTag('storefront-customer-feedback'); revalidatePath('/admin/settings', 'page'); revalidatePath('/', 'page'); }
 
 export async function getAdminCustomerFeedbackAction(): Promise<ActionResult<CustomerFeedbackImage[]>> {
   try {

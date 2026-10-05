@@ -2,9 +2,17 @@ import type { Product as StorefrontProduct } from '@/lib/data/products';
 import type { Product as DomainProduct, ProductSummary } from '@/src/types/domain';
 import type { StorefrontProductRow } from '@/src/types/database';
 
+type StorefrontCatalogRow = Pick<StorefrontProductRow,
+  | 'id' | 'slug' | 'name' | 'subtitle' | 'category_slug' | 'default_variant_price'
+  | 'base_price' | 'compare_at_price' | 'default_variant_size' | 'primary_image_url'
+  | 'description' | 'is_best_seller' | 'is_new' | 'is_featured' | 'rating'
+  | 'review_count' | 'available_quantity' | 'allow_backorder'
+>;
+
 /** Map a storefront view row to the legacy UI Product shape (slug as id). */
-export function rowToStorefrontProduct(row: StorefrontProductRow): StorefrontProduct {
+export function rowToStorefrontProduct(row: StorefrontCatalogRow): StorefrontProduct {
   return {
+    databaseId: row.id,
     id: row.slug,
     name: row.name,
     subtitle: row.subtitle ?? '',
@@ -16,9 +24,9 @@ export function rowToStorefrontProduct(row: StorefrontProductRow): StorefrontPro
     gallery: row.primary_image_url ? [row.primary_image_url] : [],
     // Notes/tags are loaded on the product detail page; listing uses summaries only.
     description: row.description ?? '',
-    longDescription: row.long_description ?? '',
+    longDescription: '',
     notes: { top: [], heart: [], base: [] },
-    ingredients: row.ingredients ?? '',
+    ingredients: '',
     isBestSeller: row.is_best_seller,
     isNew: row.is_new,
     isFeatured: row.is_featured,
@@ -31,6 +39,7 @@ export function rowToStorefrontProduct(row: StorefrontProductRow): StorefrontPro
 
 export function summaryToStorefrontProduct(s: ProductSummary): StorefrontProduct {
   return {
+    databaseId: s.id,
     id: s.slug,
     name: s.name,
     subtitle: s.subtitle ?? '',
@@ -57,6 +66,7 @@ export function summaryToStorefrontProduct(s: ProductSummary): StorefrontProduct
 export function domainToStorefrontProduct(p: DomainProduct): StorefrontProduct {
   const defaultVariant = p.variants.find((v) => v.isDefault) ?? p.variants[0];
   return {
+    databaseId: p.id,
     id: p.slug,
     name: p.name,
     subtitle: p.subtitle ?? '',

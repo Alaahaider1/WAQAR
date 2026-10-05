@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from 'next/server';
 import Script from "next/script";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
@@ -7,8 +8,6 @@ import { ToastContainer } from "@/components/ui/Toast";
 import { CatalogProvider } from "@/lib/catalog/CatalogProvider";
 import { fetchStorefrontCatalog } from "@/lib/catalog/server";
 import { getPublicSettingsAction } from "@/src/actions/settings.actions";
-
-export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
@@ -33,8 +32,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const products = await fetchStorefrontCatalog();
-  const settingsResult = await getPublicSettingsAction();
+  // Render per request while keeping the shared storefront data explicitly cached.
+  // This prevents build workers from issuing the live catalog query in parallel.
+  await connection();
+  const [products, settingsResult] = await Promise.all([
+    fetchStorefrontCatalog(),
+    getPublicSettingsAction(),
+  ]);
   const pixelId = settingsResult.success ? settingsResult.data.metaPixelId?.trim() : undefined;
   const metaPixelEnabled = settingsResult.success && settingsResult.data.metaPixelEnabled === true && /^\d+$/.test(pixelId ?? "");
   const tikTokPixelId = settingsResult.success ? settingsResult.data.tikTokPixelId?.trim() : undefined;

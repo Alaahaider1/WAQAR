@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import ProductsPageClient from "./ProductsPageClient";
-import { createServerClient } from "@/src/lib/supabase/server";
-import { CategoryRepository } from "@/src/repositories/category.repository";
+import { fetchActiveCategories } from "@/lib/catalog/server";
 
 export const metadata: Metadata = {
   title: "Collections",
@@ -11,8 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ProductsPage() {
-  const supabase = await createServerClient();
-  const categories = await new CategoryRepository(supabase).findAll();
+  const categories = await fetchActiveCategories();
   return (
     <Suspense fallback={<div style={{ paddingTop: 160, textAlign: "center", fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#6B6B63" }}>Loading…</div>}>
       <ProductsPageClient categories={categories.map((category) => ({ id: category.slug, label: category.name }))} />

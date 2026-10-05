@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { z } from 'zod';
 import { requireAdmin } from '@/src/lib/auth/guards';
 import { createAdminClient } from '@/src/lib/supabase/admin';
@@ -19,6 +19,7 @@ const VIDEO_EXTENSIONS: Record<string, string> = {
 const VideoIdSchema = z.string().uuid('Invalid video ID');
 
 function revalidate() {
+  updateTag('storefront-ugc-videos');
   revalidatePath('/admin/ugc-videos', 'page');
   revalidatePath('/', 'page');
 }

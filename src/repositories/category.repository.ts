@@ -24,23 +24,25 @@ function mapCategory(row: CategoryRow): Category {
 export class CategoryRepository extends BaseRepository {
 
   async findAll(includeInactive = false): Promise<Category[]> {
-    let query = this.db.from('categories').select('*');
+    let query = this.db
+      .from('categories')
+      .select('id, slug, name, description, image_url, position, is_active, is_featured');
     if (!includeInactive) query = query.eq('is_active', true);
     const { data, error } = await query.order('position');
     if (error) throw toWaqarError(error, 'CategoryRepository.findAll');
-    return (data ?? []).map(mapCategory);
+    return ((data ?? []) as unknown as CategoryRow[]).map(mapCategory);
   }
 
   async findFeatured(): Promise<Category[]> {
   const { data, error } = await this.db
     .from('categories')
-    .select('*')
+    .select('id, slug, name, description, image_url, position, is_active, is_featured')
     .eq('is_active', true)
     .eq('is_featured', true)
     .order('position');
 
   if (error) throw toWaqarError(error, 'CategoryRepository.findFeatured');
-  return (data ?? []).map(mapCategory);
+  return ((data ?? []) as unknown as CategoryRow[]).map(mapCategory);
 }
 
   async findBySlug(slug: string): Promise<Category> {

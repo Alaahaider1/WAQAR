@@ -219,15 +219,18 @@ export class ProductRepository extends BaseRepository {
     const { data: productData, error: productError } = await this.db
       .from('products')
       .select(`
-        *,
-        categories (*)
+        id, slug, name, subtitle, description, long_description, ingredients,
+        base_price, compare_at_price, status, is_best_seller, is_new, is_featured,
+        rating, review_count, seo_title, seo_description, created_at, updated_at,
+        categories (id, slug, name, description, image_url, position, is_active, is_featured)
       `)
       .eq('slug', slug)
       .eq('status', 'published' as ProductStatus)
       .is('deleted_at', null)
       .single();
 
-    if (productError || !productData) {
+    if (productError) throw toWaqarError(productError, 'ProductRepository.findBySlug');
+    if (!productData) {
       throw new NotFoundError('Product', slug);
     }
 
@@ -604,33 +607,29 @@ export class ProductRepository extends BaseRepository {
     };
     const productId = row.id ?? '';
 
-    // Fetch variants with inventory
-    const { data: variantData } = await this.db
-      .from('product_variants')
-      .select(`*, inventory(stock_quantity, reserved_quantity, allow_backorder)`)
-      .eq('product_id', productId)
-      .eq('is_active', true)
-      .order('position');
-
-    // Fetch images
-    const { data: imageData } = await this.db
-      .from('product_images')
-      .select('*')
-      .eq('product_id', productId)
-      .order('position');
-
-    // Fetch fragrance notes
-    const { data: noteData } = await this.db
-      .from('fragrance_notes')
-      .select('*')
-      .eq('product_id', productId)
-      .order('position');
-
-    // Fetch tags
-    const { data: tagData } = await this.db
-      .from('product_tags')
-      .select('tags(*)')
-      .eq('product_id', productId);
+    // These related collections are independent; fetch them concurrently.
+    const [variantResult, imageResult, noteResult, tagResult] = await Promise.all([
+      this.db.from('product_variants')
+        .select('id, product_id, sku, size, concentration, price, compare_at_price, is_default, is_active, position, inventory(stock_quantity, reserved_quantity, allow_backorder)')
+        .eq('product_id', productId).eq('is_active', true).order('position'),
+      this.db.from('product_images')
+        .select('id, product_id, url, alt_text, position, cloudinary_id, created_at')
+        .eq('product_id', productId).order('position'),
+      this.db.from('fragrance_notes')
+        .select('id, product_id, type, name, position, created_at')
+        .eq('product_id', productId).order('position'),
+      this.db.from('product_tags')
+        .select('tags(id, slug, name)')
+        .eq('product_id', productId),
+    ]);
+    const variantData = variantResult.data;
+    const imageData = imageResult.data;
+    const noteData = noteResult.data;
+    const tagData = tagResult.data;
+    if (variantResult.error) throw toWaqarError(variantResult.error, 'ProductRepository.assembleProduct.variants');
+    if (imageResult.error) throw toWaqarError(imageResult.error, 'ProductRepository.assembleProduct.images');
+    if (noteResult.error) throw toWaqarError(noteResult.error, 'ProductRepository.assembleProduct.notes');
+    if (tagResult.error) throw toWaqarError(tagResult.error, 'ProductRepository.assembleProduct.tags');
 
     const category = Array.isArray(row.categories)
       ? row.categories[0]
