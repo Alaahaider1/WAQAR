@@ -12,3 +12,5 @@ coverage
 .agents/
 tmp-*.js
 *.tsbuildinfo
+
+supabase/.temp/
