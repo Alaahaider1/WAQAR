@@ -15,7 +15,9 @@ import { validate, UpdateOrderStatusSchema } from '@/src/validations';
 import { actionSuccess, actionError, WaqarError, NotFoundError, toWaqarError } from '@/src/lib/errors';
 import type { ActionResult } from '@/src/lib/errors';
 import type { Order } from '@/src/types/domain';
-import { PlaceOrderSchema, priceCheckoutItems } from '@/src/lib/security/checkout';
+import { isCheckoutPaymentMethodAvailable, PlaceOrderSchema } from '@/src/lib/security/checkout';
+import { CHECKOUT_ATTEMPT_REUSED_MESSAGE } from '@/src/lib/security/checkout-attempt';
+import { createCheckoutPayloadFingerprint } from '@/src/lib/security/checkout-fingerprint';
 
 interface PlaceOrderResult {
   orderId: string;
@@ -34,115 +36,66 @@ export async function placeOrderAction(
 ): Promise<ActionResult<PlaceOrderResult>> {
   try {
     const input = validate(PlaceOrderSchema, rawData);
+    if (!isCheckoutPaymentMethodAvailable(input.paymentMethod)) {
+      throw new WaqarError('Card payments are not available yet.', 'PAYMENT_METHOD_UNAVAILABLE', 422);
+    }
+    const payloadFingerprint = createCheckoutPayloadFingerprint(input);
     const db = createAdminClient();
-
-    const productIds = [...new Set(input.items.map((item) => item.id))];
-    const { data: catalogItems, error: catalogError } = await db
-      .from('storefront_products')
-      .select('id, name, default_variant_id, default_variant_sku, default_variant_size, default_variant_price, primary_image_url')
-      .in('id', productIds);
-    if (catalogError) throw toWaqarError(catalogError, 'placeOrderAction:loadCatalog');
-    let checkout;
-    try { checkout = priceCheckoutItems(input.items, catalogItems ?? []); }
-    catch { throw new WaqarError('One or more products are no longer available', 'INVALID_CART', 422); }
-    const { items, subtotal, shipping, total } = checkout;
-
-    const fullName = `${input.firstName || ''} ${input.lastName || ''}`.trim();
-    const shippingAddress = {
-      fullName,
-      phone: input.phone || null,
-      addressLine1: input.address || '',
-      addressLine2: input.apt || null,
-      city: input.city || '',
-      state: input.state || null,
-      postalCode: input.zip || '',
-      countryCode: input.country || '',
-    };
-
-    const providerMap: Record<string, string> = {
-      card: 'stripe',
-      vodafone: 'vodafone_cash',
-      etisalat: 'etisalat_cash',
-      orange: 'orange_cash',
-      wepay: 'we_pay',
-      instapay: 'instapay',
-      cod: 'cash_on_delivery',
-    };
-
-    const { data: orderData, error: orderError } = await db
-      .from('orders')
-      .insert({
-        user_id: null,
-        status: 'pending',
-        payment_status: 'pending',
-        subtotal,
-        discount_amount: 0,
-        shipping_amount: shipping,
-        tax_amount: 0,
-        total,
-        currency: 'EGP',
-        coupon_id: null,
-        coupon_code: null,
-        shipping_address: shippingAddress,
-        billing_address: shippingAddress,
-        shipping_method: 'standard',
-        customer_notes: null,
-        admin_notes: null,
-        ip_address: null,
-        user_agent: null,
-      })
-      .select('id, order_number, total, proof_access_token')
-      .single();
-
-    if (orderError || !orderData) {
-      throw toWaqarError(orderError, 'placeOrderAction:insertOrder');
-    }
-
-    const { error: itemsError } = await db.from('order_items').insert(
-      items.map((item) => ({
-        order_id: orderData.id,
-        product_id: item.id,
-        variant_id: item.variantId,
-        product_name: item.name,
-        variant_sku: item.sku,
-        variant_size: item.size || 'Standard',
-        image_url: item.image || null,
-        unit_price: item.price,
-        quantity: item.quantity,
-        total_price: item.price * item.quantity,
-      }))
-    );
-
-    if (itemsError) {
-      throw toWaqarError(itemsError, 'placeOrderAction:insertItems');
-    }
-
-    const { error: paymentError } = await db.from('payments').insert({
-      order_id: orderData.id,
-      provider: providerMap[input.paymentMethod] ?? 'other',
-      status: 'pending',
-      amount: total,
-      currency: 'EGP',
-      provider_reference: null,
-      provider_response: null,
-      failure_reason: null,
-      paid_at: null,
+    const { data: orderRows, error: orderError } = await db.rpc('place_guest_checkout_order', {
+      p_checkout_attempt_id: input.checkoutAttemptId,
+      p_first_name: input.firstName,
+      p_last_name: input.lastName,
+      p_phone: input.phone,
+      p_address: input.address,
+      p_apt: input.apt,
+      p_city: input.city,
+      p_state: input.state,
+      p_zip: input.zip,
+      p_country: input.country,
+      p_payment_method: input.paymentMethod,
+      p_items: input.items,
+      p_payload_fingerprint: payloadFingerprint,
     });
 
-    if (paymentError) {
-      throw toWaqarError(paymentError, 'placeOrderAction:insertPayment');
+    if (orderError) {
+      if (orderError.code === '0A000') {
+        throw new WaqarError('Card payments are not available yet.', 'PAYMENT_METHOD_UNAVAILABLE', 422);
+      }
+      if (orderError.code === 'P0001') {
+        throw new WaqarError(CHECKOUT_ATTEMPT_REUSED_MESSAGE, 'CHECKOUT_ATTEMPT_REUSED', 409);
+      }
+      if (orderError.code === '22023') {
+        throw new WaqarError('One or more products are no longer available. Please review your cart.', 'INVALID_CART', 422);
+      }
+      console.error('[checkout] place_guest_checkout_order RPC failed', {
+        code: orderError.code,
+        message: orderError.message,
+        details: orderError.details,
+        hint: orderError.hint,
+      });
+      throw new WaqarError('Order initialization failed', 'ORDER_DATABASE_FAILED');
     }
+
+    const orderData = orderRows?.[0];
+    if (!orderData) throw new WaqarError('Order initialization returned no order', 'ORDER_DATABASE_FAILED');
 
     return actionSuccess({
-      orderId: orderData.id,
+      orderId: orderData.order_id,
       orderNumber: orderData.order_number,
       proofAccessToken: orderData.proof_access_token,
-      total: Number(orderData.total ?? total),
-      paymentMethod: input.paymentMethod,
+      total: Number(orderData.total),
+      paymentMethod: orderData.payment_method,
     });
   } catch (error) {
-    if (error instanceof WaqarError) return actionError(error);
-    return actionError(new WaqarError('Failed to place your order', 'ORDER_CREATE_FAILED'));
+    if (error instanceof WaqarError && error.statusCode < 500 && error.code !== 'ORDER_DATABASE_FAILED') {
+      return actionError(error);
+    }
+
+    console.error('[checkout] placeOrderAction failed', {
+      code: error instanceof WaqarError ? error.code : 'UNEXPECTED_ERROR',
+      error: error instanceof WaqarError ? error.message : error,
+    });
+    return actionError(new WaqarError('We could not place your order. Please try again.', 'ORDER_CREATE_FAILED'));
   }
 }
 

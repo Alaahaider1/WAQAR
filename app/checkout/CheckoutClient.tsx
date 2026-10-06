@@ -11,6 +11,12 @@ import { useCatalogProducts } from "@/lib/catalog/CatalogProvider";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import { GoldDivider } from "@/components/ui/GoldDivider";
 import { placeOrderAction } from "@/src/actions/order.actions";
+import {
+  CHECKOUT_ATTEMPT_REUSED_MESSAGE,
+  clearCheckoutAttemptId,
+  getOrCreateCheckoutAttemptId,
+  replaceCheckoutAttemptId,
+} from "@/src/lib/security/checkout-attempt";
 
 const S = {
   display: { fontFamily: "'Cormorant Garamond', Georgia, serif" },
@@ -73,13 +79,17 @@ export function CheckoutClient() {
   const [orderOpen, setOrderOpen] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const submitting = useRef(false);
+  const checkoutAttemptId = useRef<string | null>(null);
+  const checkoutAttemptFingerprint = useRef<string | null>(null);
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const shipping = subtotal >= 150 ? 0 : 12;
   const total = subtotal + shipping;
 
   const set = (name: string, val: string) => {
+    setSubmitError("");
     setValues((v) => ({ ...v, [name]: val }));
     setErrors((e) => ({ ...e, [name]: "" }));
   };
@@ -104,8 +114,37 @@ export function CheckoutClient() {
 
     submitting.current = true;
     setLoading(true);
+    setSubmitError("");
     try {
+      const requestFingerprint = JSON.stringify({
+        firstName: values.firstName?.trim() ?? "",
+        lastName: values.lastName?.trim() ?? "",
+        email: values.email?.trim() ?? "",
+        phone: values.phone ?? "",
+        address: values.address?.trim() ?? "",
+        apt: values.apt ?? "",
+        city: values.city?.trim() ?? "",
+        state: values.state ?? "",
+        zip: values.zip ?? "",
+        country: values.country?.trim() ?? "",
+        payment,
+        items: items.map((item) => [item.product.databaseId, item.quantity] as const).sort(([a], [b]) => a.localeCompare(b)),
+      });
+      let storage: Storage | null = null;
+      try { storage = window.sessionStorage; } catch { /* Storage may be disabled by the browser. */ }
+      if (checkoutAttemptFingerprint.current && checkoutAttemptFingerprint.current !== requestFingerprint) {
+        checkoutAttemptId.current = storage
+          ? replaceCheckoutAttemptId(storage)
+          : crypto.randomUUID();
+      } else if (!checkoutAttemptId.current) {
+        checkoutAttemptId.current = storage
+          ? getOrCreateCheckoutAttemptId(storage)
+          : crypto.randomUUID();
+      }
+      checkoutAttemptFingerprint.current = requestFingerprint;
+
       const result = await placeOrderAction({
+        checkoutAttemptId: checkoutAttemptId.current,
         firstName: values.firstName || "",
         lastName: values.lastName || "",
         email: values.email || "",
@@ -117,9 +156,6 @@ export function CheckoutClient() {
         zip: values.zip || "",
         country: values.country || "",
         paymentMethod: payment,
-        subtotal,
-        shipping,
-        total,
         items: items.map((item) => ({
           id: item.product.databaseId,
           quantity: item.quantity,
@@ -127,10 +163,23 @@ export function CheckoutClient() {
       });
 
       if (!result.success) {
-        throw new Error(result.error);
+        if (result.error === CHECKOUT_ATTEMPT_REUSED_MESSAGE) {
+          try {
+            const storage = window.sessionStorage;
+            checkoutAttemptId.current = replaceCheckoutAttemptId(storage);
+          } catch {
+            checkoutAttemptId.current = crypto.randomUUID();
+          }
+          checkoutAttemptFingerprint.current = requestFingerprint;
+        }
+        setSubmitError(result.error);
+        return;
       }
 
       clearCart();
+      checkoutAttemptId.current = null;
+      checkoutAttemptFingerprint.current = null;
+      try { clearCheckoutAttemptId(window.sessionStorage); } catch { /* Safe to continue after order creation. */ }
       const params = new URLSearchParams({
         orderNumber: result.data.orderNumber,
         accessToken: result.data.proofAccessToken,
@@ -138,13 +187,13 @@ export function CheckoutClient() {
         method: result.data.paymentMethod,
       });
 
-      const destination = payment === "cod"
+      const destination = result.data.paymentMethod === "cod"
         ? `/checkout/confirmation?${params.toString()}`
         : `/checkout/payment-instructions?${params.toString()}`;
 
       router.push(destination);
-    } catch (error) {
-      console.error(error);
+    } catch {
+      setSubmitError("We couldn't reach the checkout service. Please try again.");
     } finally {
       submitting.current = false;
       setLoading(false);
@@ -356,7 +405,10 @@ export function CheckoutClient() {
                       <button
                         key={id}
                         type="button"
-                        onClick={() => setPayment(id)}
+                        onClick={() => {
+                          setSubmitError("");
+                          setPayment(id);
+                        }}
                         style={{
                           display: "flex", alignItems: "center", gap: 12,
                           padding: "14px 16px",
@@ -422,6 +474,11 @@ export function CheckoutClient() {
                   <><Lock size={13} strokeWidth={1.5} /> Place Order · {formatPrice(total)}</>
                 )}
               </button>
+              {submitError && (
+                <p role="alert" style={{ ...S.body, fontSize: 12, lineHeight: 1.6, color: "#cc4444", margin: "12px 0 0" }}>
+                  {submitError}
+                </p>
+              )}
               <p style={{ ...S.body, fontSize: 11, color: "#6B6B63", display: "flex", alignItems: "center", gap: 5, marginTop: -28 }}>
                 <Lock size={10} strokeWidth={1.5} /> SSL encrypted. Your payment information is secure.
               </p>

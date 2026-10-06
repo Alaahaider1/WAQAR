@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const PlaceOrderSchema = z.object({
+  checkoutAttemptId: z.string().uuid(),
   firstName: z.string().trim().min(1).max(100),
   lastName: z.string().trim().min(1).max(100),
   email: z.string().trim().email().max(254),
@@ -17,6 +18,12 @@ export const PlaceOrderSchema = z.object({
     quantity: z.number().int().min(1).max(20),
   })).min(1).max(50),
 });
+
+export function isCheckoutPaymentMethodAvailable(
+  paymentMethod: z.infer<typeof PlaceOrderSchema>['paymentMethod'],
+) {
+  return paymentMethod !== 'card';
+}
 
 export function priceCheckoutItems(
   requestedItems: z.infer<typeof PlaceOrderSchema>['items'],

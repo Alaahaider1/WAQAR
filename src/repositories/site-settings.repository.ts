@@ -30,6 +30,23 @@ export class SiteSettingsRepository extends BaseRepository {
     return this.rowsToSettings(data ?? []);
   }
 
+  /** Fetch only the account details displayed on manual payment instructions. */
+  async findPaymentDetails(): Promise<Partial<SiteSettings>> {
+    const { data, error } = await this.db
+      .from('site_settings')
+      .select('key, value')
+      .in('key', [
+        'vodafone_cash_number',
+        'orange_cash_number',
+        'etisalat_cash_number',
+        'we_pay_number',
+        'instapay_account',
+      ]);
+
+    if (error) throw toWaqarError(error, 'SiteSettingsRepository.findPaymentDetails');
+    return this.rowsToSettings(data ?? []);
+  }
+
   async get<T = unknown>(key: string): Promise<T | null> {
     const { data, error } = await this.db
       .from('site_settings')

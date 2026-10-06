@@ -45,16 +45,19 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ o
     redirect("/checkout");
   }
 
-  const { data: paymentData } = await db
-    .from("payments")
-    .select("provider, provider_response")
-    .eq("order_id", orderData.id)
-    .maybeSingle();
+  const [paymentResult, settings] = await Promise.all([
+    db
+      .from("payments")
+      .select("provider, provider_response")
+      .eq("order_id", orderData.id)
+      .maybeSingle(),
+    new SiteSettingsRepository(db).findPaymentDetails(),
+  ]);
+  const paymentData = paymentResult.data;
 
   const provider = paymentData?.provider ?? "";
   const method = paymentMethodIdsByProvider[provider] ?? provider;
   const label = provider ? getPaymentMethodLabel(method) : "Payment method unavailable";
-  const settings = await new SiteSettingsRepository(db).findAll();
   const manualProviders = ["vodafone_cash", "orange_cash", "etisalat_cash", "we_pay", "instapay"];
   const isManualMethod = manualProviders.includes(provider);
   let proofStatus: string | null = null;

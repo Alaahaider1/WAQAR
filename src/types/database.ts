@@ -598,6 +598,8 @@ export interface Database {
           id: string
           order_number: string
           proof_access_token: string
+          checkout_attempt_id: string | null
+          checkout_payload_fingerprint: string | null
           user_id: string | null
           status: string
           payment_status: string
@@ -628,6 +630,8 @@ export interface Database {
           id?: string
           order_number?: string
           proof_access_token?: string
+          checkout_attempt_id?: string | null
+          checkout_payload_fingerprint?: string | null
           user_id?: string | null
           status?: string
           payment_status?: string
@@ -658,6 +662,8 @@ export interface Database {
           id?: string
           order_number?: string
           proof_access_token?: string
+          checkout_attempt_id?: string | null
+          checkout_payload_fingerprint?: string | null
           user_id?: string | null
           status?: string
           payment_status?: string
@@ -1206,6 +1212,30 @@ export interface Database {
       }
     }
     Functions: {
+      place_guest_checkout_order: {
+        Args: {
+          p_checkout_attempt_id: string
+          p_first_name: string
+          p_last_name: string
+          p_phone: string
+          p_address: string
+          p_apt: string
+          p_city: string
+          p_state: string
+          p_zip: string
+          p_country: string
+          p_payment_method: string
+          p_items: Json
+          p_payload_fingerprint: string
+        }
+        Returns: {
+          order_id: string
+          order_number: string
+          proof_access_token: string
+          total: number
+          payment_method: string
+        }[]
+      }
       generate_order_number: {
         Args: Record<PropertyKey, never>
         Returns: string
