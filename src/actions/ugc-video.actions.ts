@@ -12,6 +12,12 @@ import type { ActionResult } from '@/src/lib/errors';
 import { isManagedUgcStoragePath, ugcStoragePathFromPublicUrl } from '@/src/lib/ugc-video-storage';
 
 const UGC_BUCKET = 'ugc-videos';
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+const VIDEO_EXTENSIONS: Record<string, string> = {
+  'video/mp4': 'mp4', 'application/mp4': 'mp4', 'video/x-m4v': 'mp4',
+  'video/webm': 'webm', 'video/quicktime': 'mov',
+};
+const MIME_BY_EXTENSION: Record<string, string> = { mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime' };
 const VideoIdSchema = z.string().uuid('Invalid video ID');
 
 function revalidate() {
@@ -43,6 +49,29 @@ async function removeStoredVideo(path: string): Promise<void> {
   // Supabase Storage remove is idempotent for missing objects. Treat explicit
   // not-found responses the same way to allow cleanup of stale database rows.
   if (error && error.statusCode !== '404') throw error;
+}
+
+export async function createUgcVideoUploadTargetAction(
+  fileName: string,
+  fileType: string,
+  fileSize: number,
+): Promise<ActionResult<{ path: string; token: string; contentType: string }>> {
+  try {
+    await requireAdmin();
+    if (!Number.isFinite(fileSize) || fileSize <= 0) throw new ValidationError('Please select a video file.');
+    if (fileSize > MAX_VIDEO_BYTES) throw new ValidationError('Video files must be 50 MiB or smaller.');
+
+    const extension = VIDEO_EXTENSIONS[fileType.toLowerCase()]
+      ?? fileName.toLowerCase().match(/\.(mp4|webm|mov)$/)?.[1];
+    if (!extension || !MIME_BY_EXTENSION[extension]) throw new ValidationError('Upload an MP4, WebM, or MOV video file.');
+
+    const path = `uploads/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${extension}`;
+    const { data, error } = await createAdminClient().storage.from(UGC_BUCKET).createSignedUploadUrl(path, { upsert: false });
+    if (error) throw error;
+    return actionSuccess({ path: data.path, token: data.token, contentType: MIME_BY_EXTENSION[extension] });
+  } catch (error) {
+    return safeFailure(error, 'Could not prepare the video upload. Please try again.');
+  }
 }
 
 export async function createUgcVideoAction(rawData: unknown): Promise<ActionResult<void>> {

@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from 'react';
 import { Check, Pencil, Plus, Trash2, Upload, Video } from 'lucide-react';
-import { createUgcVideoAction, deleteUgcVideoAction, updateUgcVideoAction } from '@/src/actions/ugc-video.actions';
+import { createUgcVideoAction, createUgcVideoUploadTargetAction, deleteUgcVideoAction, updateUgcVideoAction } from '@/src/actions/ugc-video.actions';
 import { toast } from '@/components/ui/Toast';
 import { useRouter } from 'next/navigation';
 import type { AdminUgcVideo } from '@/src/types/domain';
@@ -13,11 +13,6 @@ type Form = { videoUrl: string; customerName: string; caption: string; position:
 const blank: Form = { videoUrl:'', customerName:'', caption:'', position:0, isVisible:true };
 const input: React.CSSProperties = { width:'100%', boxSizing:'border-box', padding:'10px 12px', border:'1px solid #EDE8DC', background:'#FAFAF7', color:'#1A1A18', outline:'none', ...S.b, fontSize:13 };
 const isSupportedVideo = (file: File) => file.type.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(file.name);
-const extensionFor = (file: File) => {
-  const extensions: Record<string, string> = { 'video/mp4':'mp4', 'application/mp4':'mp4', 'video/x-m4v':'mp4', 'video/webm':'webm', 'video/quicktime':'mov' };
-  return extensions[file.type.toLowerCase()] ?? file.name.toLowerCase().match(/\.(mp4|webm|mov)$/)?.[1] ?? null;
-};
-const MIME_BY_EXTENSION: Record<string, string> = { mp4:'video/mp4', webm:'video/webm', mov:'video/quicktime' };
 const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 const UGC_BUCKET = 'ugc-videos';
 
@@ -42,19 +37,18 @@ function VideoForm({ initial = blank, submitLabel, onSave, onCancel }: { initial
     if (!file.name || file.size === 0) { toast.error('UGC upload failed: selected video is empty.'); return; }
     if (!isSupportedVideo(file)) { toast.error('Choose an MP4, WebM, or MOV video file.'); return; }
     if (file.size > MAX_VIDEO_BYTES) { toast.error('Video files must be 50 MiB or smaller.'); return; }
-    const extension = extensionFor(file);
-    if (!extension) { toast.error('Choose an MP4, WebM, or MOV video file.'); return; }
     uploadingRef.current = true;
     setUploading(true);
     try {
-      const path = `uploads/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${extension}`;
+      const target = await createUgcVideoUploadTargetAction(file.name, file.type, file.size);
+      if (!target.success) throw new Error(target.error);
       const storage = createBrowserClient().storage.from(UGC_BUCKET);
-      const { error } = await storage.upload(path, file, { contentType: MIME_BY_EXTENSION[extension], cacheControl: '31536000', upsert: false });
+      const { error } = await storage.uploadToSignedUrl(target.data.path, target.data.token, file, { contentType: target.data.contentType, cacheControl: '31536000' });
       if (error) throw error;
-      const { data } = storage.getPublicUrl(path);
+      const { data } = storage.getPublicUrl(target.data.path);
       if (!data.publicUrl) throw new Error('Public UGC URL was not created');
       await removeUploadedFile();
-      uploadedRef.current = { path };
+      uploadedRef.current = { path: target.data.path };
       setForm(current => ({ ...current, videoUrl: data.publicUrl }));
       toast.success('Video uploaded. Add its details and save.');
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Video upload failed'); }

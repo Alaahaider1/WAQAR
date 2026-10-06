@@ -34,13 +34,17 @@ test('UGC browser payloads exclude Storage paths and audit timestamps', () => {
   assert.match(adminPage, /await requireAdmin\(\)/);
 });
 
-test('UGC video bytes upload directly to Storage and browser form never receives storage_path', () => {
+test('UGC videos use an admin-authorized signed target and upload bytes directly to Storage', () => {
   const client = readFileSync(new URL('../app/admin/ugc-videos/UgcVideosClient.tsx', import.meta.url), 'utf8');
+  const actions = readFileSync(new URL('../src/actions/ugc-video.actions.ts', import.meta.url), 'utf8');
   assert.equal(existsSync(new URL('../app/api/admin/ugc-videos/upload/route.ts', import.meta.url)), false);
   assert.match(client, /createBrowserClient\(\)\.storage\.from\(UGC_BUCKET\)/);
-  assert.match(client, /storage\.upload\(path, file/);
+  assert.match(client, /createUgcVideoUploadTargetAction\(file\.name, file\.type, file\.size\)/);
+  assert.match(client, /storage\.uploadToSignedUrl\(target\.data\.path, target\.data\.token, file/);
   assert.match(client, /50 \* 1024 \* 1024/);
-  assert.match(client, /uploads\/\$\{new Date\(\)\.toISOString\(\)\.slice\(0, 10\)\}\/\$\{crypto\.randomUUID\(\)\}/);
+  assert.match(actions, /await requireAdmin\(\)[\s\S]*?fileSize > MAX_VIDEO_BYTES/);
+  assert.match(actions, /const path = `uploads\/\$\{new Date\(\)\.toISOString\(\)\.slice\(0, 10\)\}\/\$\{crypto\.randomUUID\(\)\}/);
+  assert.match(actions, /createSignedUploadUrl\(path, \{ upsert: false \}\)/);
   assert.doesNotMatch(client, /fetch\(['"]\/api\/admin\/ugc-videos\/upload/);
   assert.doesNotMatch(client, /SUPABASE_SERVICE_ROLE_KEY|createAdminClient/);
   assert.doesNotMatch(client, /storagePath|storage_path/);
@@ -65,7 +69,7 @@ test('UGC admin cards render full-width Edit and Delete actions with safe confir
 
 test('every UGC server action checks admin before privileged work', () => {
   const actions = readFileSync(new URL('../src/actions/ugc-video.actions.ts', import.meta.url), 'utf8');
-  assert.equal((actions.match(/await requireAdmin\(\)/g) ?? []).length, 3);
+  assert.equal((actions.match(/await requireAdmin\(\)/g) ?? []).length, 4);
   assert.match(actions, /safeFailure\(error, 'Could not delete the UGC video/);
   const deletion = actions.slice(actions.indexOf('export async function deleteUgcVideoAction'));
   assert.ok(deletion.indexOf('await requireAdmin()') < deletion.indexOf('createAdminClient()'));
