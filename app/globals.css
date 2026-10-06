@@ -165,6 +165,24 @@ html {
   }
 }
 
+@media (max-width: 640px) {
+  .hero-section {
+    min-height: clamp(360px, calc(90vw + 72px), 470px);
+  }
+
+  .hero-image-element {
+    object-fit: cover;
+    object-position: 56% center;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .product-quick-add {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+}
+
 /* Focus */
 *:focus-visible {
   outline: 2px solid #B8965A;

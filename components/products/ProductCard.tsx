@@ -70,6 +70,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
           {/* Quick Add button — slides up on hover */}
           <motion.button
+            className="product-quick-add"
             onClick={handleAddToCart}
             animate={{ y: hovered ? 0 : 12, opacity: hovered ? 1 : 0 }}
             transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
