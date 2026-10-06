@@ -2,12 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { LoaderCircle, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { deleteOrderAction } from "@/src/actions/order.actions";
 import { toast } from "@/components/ui/Toast";
 
 export function DeleteOrderButton({ orderId, orderNumber }: { orderId: string; orderNumber: string }) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -20,7 +18,6 @@ export function DeleteOrderButton({ orderId, orderNumber }: { orderId: string; o
       }
       setOpen(false);
       toast.success("Order deleted successfully.");
-      router.refresh();
     });
   }
 
