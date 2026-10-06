@@ -27,19 +27,19 @@ const S = {
 type Field = { label: string; name: string; type?: string; placeholder: string; half?: boolean };
 
 const CUSTOMER_FIELDS: Field[] = [
-  { label: "First Name", name: "firstName", placeholder: "John", half: true },
-  { label: "Last Name", name: "lastName", placeholder: "Smith", half: true },
-  { label: "Email Address", name: "email", type: "email", placeholder: "elise@example.com" },
-  { label: "Phone Number", name: "phone", type: "tel", placeholder: "+1 (555) 000-0000" },
+  { label: "First Name", name: "firstName", placeholder: "أحمد", half: true },
+  { label: "Last Name", name: "lastName", placeholder: "محمد", half: true },
+  { label: "Email Address", name: "email", type: "email", placeholder: "ahmed@example.com" },
+  { label: "Phone Number", name: "phone", type: "tel", placeholder: "01012345678" },
 ];
 
 const SHIPPING_FIELDS: Field[] = [
-  { label: "Street Address", name: "address", placeholder: "24 Rue du Faubourg Saint-Honoré" },
-  { label: "Apartment / Suite", name: "apt", placeholder: "Apt 4B (optional)" },
-  { label: "City", name: "city", placeholder: "Paris", half: true },
-  { label: "State / Region", name: "state", placeholder: "Île-de-France", half: true },
-  { label: "Postal Code", name: "zip", placeholder: "75008", half: true },
-  { label: "Country", name: "country", placeholder: "France", half: true },
+  { label: "Street Address", name: "address", placeholder: "شارع التحرير، الدقي" },
+  { label: "Apartment / Suite", name: "apt", placeholder: "شقة 12" },
+  { label: "City", name: "city", placeholder: "القاهرة", half: true },
+  { label: "State / Region", name: "state", placeholder: "الجيزة", half: true },
+  { label: "Postal Code", name: "zip", placeholder: "12345", half: true },
+  { label: "Country", name: "country", placeholder: "مصر", half: true },
 ];
 
 function FormField({ field, value, error, onChange }: { field: Field; value: string; error?: string; onChange: (v: string) => void }) {
