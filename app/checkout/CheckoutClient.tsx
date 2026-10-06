@@ -36,8 +36,8 @@ const CUSTOMER_FIELDS: Field[] = [
 const SHIPPING_FIELDS: Field[] = [
   { label: "Street Address", name: "address", placeholder: "شارع التحرير، الدقي" },
   { label: "Apartment / Suite", name: "apt", placeholder: "شقة 12" },
-  { label: "City", name: "city", placeholder: "القاهرة", half: true },
-  { label: "State / Region", name: "state", placeholder: "الجيزة", half: true },
+  { label: "City", name: "city", placeholder: "المعادي", half: true },
+  { label: "State / Region", name: "state", placeholder: "القاهرة", half: true },
   { label: "Postal Code", name: "zip", placeholder: "12345", half: true },
   { label: "Country", name: "country", placeholder: "مصر", half: true },
 ];
