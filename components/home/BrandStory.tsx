@@ -68,7 +68,7 @@ export function BrandStory() {
               }}
             >
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 36, fontWeight: 300, color: "#1A1A18", lineHeight: 1, margin: 0 }}>
-                
+                WAQAR
               </p>
               <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: "0.25em", textTransform: "uppercase", color: "#6B6B63", marginTop: 8 }}>
                 Est. 2025
@@ -82,9 +82,9 @@ export function BrandStory() {
               Our Heritage
             </p>
             <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 300, color: "#1A1A18", lineHeight: 1.15, marginBottom: 24 }}>
-              Built on Excellence,{" "}
-              <em>Worn Worldwide</em>
-            </h2>
+  Built on Excellence,{" "}
+  <em>Made to Be Remembered</em>
+</h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 28 }}>
   {[
