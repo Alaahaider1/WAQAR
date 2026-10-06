@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, Check, ChevronRight, Star, Truck, RefreshCw, Shield } from "lucide-react";
 import { useStorefrontProducts } from "@/lib/hooks/useStorefrontProducts";
@@ -32,13 +33,22 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const { getRelated } = useStorefrontProducts();
   const related = getRelated(product.id, 4);
   const addItem = useCartStore((s) => s.addItem);
+  const router = useRouter();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const buyingNow = useRef(false);
 
   const handleAdd = () => {
     addItem(product, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 2200);
+  };
+
+  const handleBuyNow = () => {
+    if (buyingNow.current) return;
+    buyingNow.current = true;
+    addItem(product, qty);
+    router.push("/checkout");
   };
 
   return (
@@ -152,6 +162,19 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     )}
                   </AnimatePresence>
                 </button>
+                <button
+                  type="button"
+                  onClick={handleBuyNow}
+                  className="product-buy-button"
+                  style={{
+                    flex: 1, minWidth: 180, display: "flex", alignItems: "center", justifyContent: "center",
+                    backgroundColor: "#B8965A", color: "#FAFAF7", border: "none", cursor: "pointer",
+                    ...S.mono, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase",
+                    padding: "14px 24px", transition: "background-color 0.3s",
+                  }}
+                >
+                  Buy Now
+                </button>
               </div>
 
               {/* Guarantees */}
@@ -219,6 +242,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           .product-price-row { flex-wrap: wrap; min-width: 0; }
           .product-cart-controls { align-items: stretch; min-width: 0; }
           .product-add-button { min-width: 0 !important; box-sizing: border-box; }
+          .product-buy-button { flex: 1 0 100% !important; min-width: 0 !important; box-sizing: border-box; }
           .product-guarantees > * { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
           .related-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
           .related-grid h3, .related-grid p { overflow-wrap: anywhere; }
