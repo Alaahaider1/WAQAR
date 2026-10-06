@@ -44,6 +44,20 @@ test('checkout rejects unavailable products and invalid quantities', () => {
   assert.equal(PlaceOrderSchema.safeParse({ ...request, checkoutAttemptId: 'invalid' }).success, false);
 });
 
+test('checkout email is optional but validates non-empty addresses', () => {
+  assert.equal(PlaceOrderSchema.safeParse({ ...request, email: '' }).success, true);
+  assert.equal(PlaceOrderSchema.safeParse({ ...request, email: '   ' }).success, true);
+  assert.equal(PlaceOrderSchema.safeParse({ ...request, email: 'not-an-email' }).success, false);
+  assert.equal(PlaceOrderSchema.safeParse({ ...request, email: 'ahmed@example.com' }).success, true);
+});
+
+test('checkout postal code is optional and keeps its maximum-length validation', () => {
+  assert.equal(PlaceOrderSchema.safeParse({ ...request, zip: '' }).success, true);
+  assert.equal(PlaceOrderSchema.safeParse({ ...request, zip: '   ' }).success, true);
+  assert.equal(PlaceOrderSchema.safeParse({ ...request, zip: '12345' }).success, true);
+  assert.equal(PlaceOrderSchema.safeParse({ ...request, zip: '123456789012345678901' }).success, false);
+});
+
 test('card remains a recognized method but is unavailable in the current checkout', () => {
   const cardRequest = PlaceOrderSchema.parse({ ...request, paymentMethod: 'card' });
   assert.equal(cardRequest.paymentMethod, 'card');

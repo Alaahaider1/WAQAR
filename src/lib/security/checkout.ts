@@ -4,13 +4,16 @@ export const PlaceOrderSchema = z.object({
   checkoutAttemptId: z.string().uuid(),
   firstName: z.string().trim().min(1).max(100),
   lastName: z.string().trim().min(1).max(100),
-  email: z.string().trim().email().max(254),
+  email: z.string().trim().max(254).refine(
+    (email) => email === '' || z.string().email().max(254).safeParse(email).success,
+    'Invalid email address',
+  ),
   phone: z.string().max(30),
   address: z.string().trim().min(5).max(255),
   apt: z.string().max(255),
   city: z.string().trim().min(2).max(100),
   state: z.string().max(100),
-  zip: z.string().max(20),
+  zip: z.string().trim().max(20),
   country: z.string().trim().min(2).max(100),
   paymentMethod: z.enum(['card', 'vodafone', 'etisalat', 'orange', 'wepay', 'instapay', 'cod']),
   items: z.array(z.object({

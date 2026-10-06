@@ -86,17 +86,26 @@ export function BrandStory() {
               <em>Worn Worldwide</em>
             </h2>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 28 }}>
-              {[
-                "WAQAR was founded in 1987 with a singular vision: to create the world's most exceptional fragrances by sourcing only the finest natural ingredients from across the globe.",
-                "We source only the rarest natural materials: Bulgarian rose harvested at dawn, Cambodian oud aged for twenty years, vanilla absolute from the rainforests of Madagascar. Each perfume begins as an idea — a memory, a landscape, a feeling — and ends only when it is exactly right.",
-                "No compromises. No shortcuts. Only the finest fragrance, in every bottle.",
-              ].map((para, i) => (
-                <p key={i} style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 14, color: "#6B6B63", lineHeight: 1.85, margin: 0 }}>
-                  {para}
-                </p>
-              ))}
-            </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 28 }}>
+  {[
+    "WAQAR was born in 2025 with a simple belief: fragrance is more than a scent — it is a signature.",
+    "We create refined fragrances inspired by timeless elegance, modern character, and the moments that stay with you. Every composition is carefully selected to offer a distinctive experience, from the first note to the last.",
+    "Made for those who appreciate the details. Made to leave an impression. Made to be remembered.",
+  ].map((para, i) => (
+    <p
+      key={i}
+      style={{
+        fontFamily: "'DM Sans', system-ui, sans-serif",
+        fontSize: 14,
+        color: "#6B6B63",
+        lineHeight: 1.85,
+        margin: 0,
+      }}
+    >
+      {para}
+    </p>
+  ))}
+</div>
 
             <div style={{ width: 48, height: 1, backgroundColor: "#B8965A", opacity: 0.5, marginBottom: 28 }} />
 

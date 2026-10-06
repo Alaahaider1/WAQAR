@@ -95,10 +95,11 @@ export function CheckoutClient() {
   };
 
   const validate = () => {
-    const required = ["firstName", "lastName", "email", "address", "city", "zip", "country"];
+    const required = ["firstName", "lastName", "address", "city", "country"];
     const newErrors: Record<string, string> = {};
     required.forEach((f) => { if (!values[f]?.trim()) newErrors[f] = "This field is required"; });
-    if (values.email && !/\S+@\S+\.\S+/.test(values.email)) newErrors.email = "Enter a valid email address";
+    const email = values.email?.trim();
+    if (email && !/\S+@\S+\.\S+/.test(email)) newErrors.email = "Enter a valid email address";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -218,7 +219,8 @@ export function CheckoutClient() {
               Merci, {values.firstName || "Dear Customer"}
             </h1>
             <p style={{ ...S.body, fontSize: 14, color: "#6B6B63", lineHeight: 1.8, marginBottom: 12 }}>
-              Your order has been received and is being prepared with great care. A confirmation email has been sent to <strong style={{ color: "#1A1A18" }}>{values.email}</strong>.
+              Your order has been received and is being prepared with great care.
+              {values.email?.trim() && <> A confirmation email has been sent to <strong style={{ color: "#1A1A18" }}>{values.email}</strong>.</>}
             </p>
             <p style={{ ...S.body, fontSize: 14, color: "#6B6B63", lineHeight: 1.8, marginBottom: 40 }}>
               Estimated delivery: <strong style={{ color: "#1A1A18" }}>3–5 business days</strong>
