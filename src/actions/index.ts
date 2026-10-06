@@ -50,7 +50,7 @@ export {
   deleteCategoryAction,
 } from './category.actions';
 
-export { createUgcVideoAction, updateUgcVideoAction, deleteUgcVideoAction, uploadUgcVideoFileAction } from './ugc-video.actions';
+export { createUgcVideoAction, updateUgcVideoAction, deleteUgcVideoAction } from './ugc-video.actions';
 export { getAdminCustomerFeedbackAction, createCustomerFeedbackAction, updateCustomerFeedbackAction, moveCustomerFeedbackAction, deleteCustomerFeedbackAction } from './customer-feedback.actions';
 
 export {

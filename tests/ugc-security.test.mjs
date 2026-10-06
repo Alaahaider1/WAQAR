@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 import { isManagedUgcStoragePath, ugcStoragePathFromPublicUrl } from '../src/lib/ugc-video-storage.ts';
 
@@ -34,12 +34,15 @@ test('UGC browser payloads exclude Storage paths and audit timestamps', () => {
   assert.match(adminPage, /await requireAdmin\(\)/);
 });
 
-test('UGC upload response and browser form never receive storage_path', () => {
-  const route = readFileSync(new URL('../app/api/admin/ugc-videos/upload/route.ts', import.meta.url), 'utf8');
+test('UGC video bytes upload directly to Storage and browser form never receives storage_path', () => {
   const client = readFileSync(new URL('../app/admin/ugc-videos/UgcVideosClient.tsx', import.meta.url), 'utf8');
-  assert.match(route, /await requireAdmin\(\)/);
-  assert.match(route, /data: \{ videoUrl: data\.publicUrl \}/);
-  assert.doesNotMatch(route, /data: \{ videoUrl: data\.publicUrl, storagePath \}/);
+  assert.equal(existsSync(new URL('../app/api/admin/ugc-videos/upload/route.ts', import.meta.url)), false);
+  assert.match(client, /createBrowserClient\(\)\.storage\.from\(UGC_BUCKET\)/);
+  assert.match(client, /storage\.upload\(path, file/);
+  assert.match(client, /50 \* 1024 \* 1024/);
+  assert.match(client, /uploads\/\$\{new Date\(\)\.toISOString\(\)\.slice\(0, 10\)\}\/\$\{crypto\.randomUUID\(\)\}/);
+  assert.doesNotMatch(client, /fetch\(['"]\/api\/admin\/ugc-videos\/upload/);
+  assert.doesNotMatch(client, /SUPABASE_SERVICE_ROLE_KEY|createAdminClient/);
   assert.doesNotMatch(client, /storagePath|storage_path/);
 });
 
@@ -62,7 +65,7 @@ test('UGC admin cards render full-width Edit and Delete actions with safe confir
 
 test('every UGC server action checks admin before privileged work', () => {
   const actions = readFileSync(new URL('../src/actions/ugc-video.actions.ts', import.meta.url), 'utf8');
-  assert.equal((actions.match(/await requireAdmin\(\)/g) ?? []).length, 4);
+  assert.equal((actions.match(/await requireAdmin\(\)/g) ?? []).length, 3);
   assert.match(actions, /safeFailure\(error, 'Could not delete the UGC video/);
   const deletion = actions.slice(actions.indexOf('export async function deleteUgcVideoAction'));
   assert.ok(deletion.indexOf('await requireAdmin()') < deletion.indexOf('createAdminClient()'));
@@ -73,10 +76,7 @@ test('every UGC server action checks admin before privileged work', () => {
 });
 
 test('UGC production failures are sanitized before returning to clients', () => {
-  const route = readFileSync(new URL('../app/api/admin/ugc-videos/upload/route.ts', import.meta.url), 'utf8');
   const actions = readFileSync(new URL('../src/actions/ugc-video.actions.ts', import.meta.url), 'utf8');
-  assert.match(route, /failure\('video could not be uploaded\. Please try again\.'/);
-  assert.doesNotMatch(route, /failure\([^\n]*(error\.message|reason)/);
   assert.match(actions, /console\.error\('\[ugc-videos\] server operation failed', error\)/);
   assert.doesNotMatch(actions, /return actionError\(error\)/);
 });

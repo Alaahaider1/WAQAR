@@ -12,10 +12,6 @@ import type { ActionResult } from '@/src/lib/errors';
 import { isManagedUgcStoragePath, ugcStoragePathFromPublicUrl } from '@/src/lib/ugc-video-storage';
 
 const UGC_BUCKET = 'ugc-videos';
-const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
-const VIDEO_EXTENSIONS: Record<string, string> = {
-  'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov',
-};
 const VideoIdSchema = z.string().uuid('Invalid video ID');
 
 function revalidate() {
@@ -47,28 +43,6 @@ async function removeStoredVideo(path: string): Promise<void> {
   // Supabase Storage remove is idempotent for missing objects. Treat explicit
   // not-found responses the same way to allow cleanup of stale database rows.
   if (error && error.statusCode !== '404') throw error;
-}
-
-/** Admin-only compatibility action for server-side upload callers. */
-export async function uploadUgcVideoFileAction(formData: FormData): Promise<ActionResult<{ videoUrl: string }>> {
-  try {
-    await requireAdmin();
-    const file = formData.get('video');
-    if (!(file instanceof File) || !file.size) throw new ValidationError('Please select a video file.');
-    const extension = VIDEO_EXTENSIONS[file.type];
-    if (!extension) throw new ValidationError('Upload an MP4, WebM, or MOV video file.');
-    if (file.size > MAX_VIDEO_BYTES) throw new ValidationError('Video files must be 50 MB or smaller.');
-
-    const storagePath = `uploads/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${extension}`;
-    const storage = createAdminClient().storage.from(UGC_BUCKET);
-    const { error } = await storage.upload(storagePath, file, { contentType: file.type, cacheControl: '31536000', upsert: false });
-    if (error) throw error;
-    const { data } = storage.getPublicUrl(storagePath);
-    if (!data.publicUrl) throw new Error('Public UGC URL was not created');
-    return actionSuccess({ videoUrl: data.publicUrl });
-  } catch (error) {
-    return safeFailure(error, 'Could not upload the video. Please try again.');
-  }
 }
 
 export async function createUgcVideoAction(rawData: unknown): Promise<ActionResult<void>> {

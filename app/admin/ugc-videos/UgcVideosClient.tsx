@@ -1,60 +1,86 @@
 ﻿'use client';
 
 import { useRef, useState, useTransition } from 'react';
-import { Check, Eye, EyeOff, Pencil, Plus, Trash2, Upload, Video } from 'lucide-react';
+import { Check, Pencil, Plus, Trash2, Upload, Video } from 'lucide-react';
 import { createUgcVideoAction, deleteUgcVideoAction, updateUgcVideoAction } from '@/src/actions/ugc-video.actions';
 import { toast } from '@/components/ui/Toast';
 import { useRouter } from 'next/navigation';
 import type { AdminUgcVideo } from '@/src/types/domain';
+import { createBrowserClient } from '@/src/lib/supabase/client';
 
 const S = { d:{fontFamily:"'Cormorant Garamond',Georgia,serif"}, b:{fontFamily:"'DM Sans',system-ui,sans-serif"}, m:{fontFamily:"'DM Mono',monospace"} } as const;
 type Form = { videoUrl: string; customerName: string; caption: string; position: number; isVisible: boolean };
-type UploadResult = { success: true; data: { videoUrl: string } } | { success: false; error: string; code: string };
 const blank: Form = { videoUrl:'', customerName:'', caption:'', position:0, isVisible:true };
 const input: React.CSSProperties = { width:'100%', boxSizing:'border-box', padding:'10px 12px', border:'1px solid #EDE8DC', background:'#FAFAF7', color:'#1A1A18', outline:'none', ...S.b, fontSize:13 };
 const isSupportedVideo = (file: File) => file.type.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(file.name);
+const extensionFor = (file: File) => {
+  const extensions: Record<string, string> = { 'video/mp4':'mp4', 'application/mp4':'mp4', 'video/x-m4v':'mp4', 'video/webm':'webm', 'video/quicktime':'mov' };
+  return extensions[file.type.toLowerCase()] ?? file.name.toLowerCase().match(/\.(mp4|webm|mov)$/)?.[1] ?? null;
+};
+const MIME_BY_EXTENSION: Record<string, string> = { mp4:'video/mp4', webm:'video/webm', mov:'video/quicktime' };
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+const UGC_BUCKET = 'ugc-videos';
 
-function VideoForm({ initial = blank, submitLabel, onSave, onCancel }: { initial?: Form; submitLabel: string; onSave: (value: Form) => Promise<void>; onCancel: () => void }) {
+function VideoForm({ initial = blank, submitLabel, onSave, onCancel }: { initial?: Form; submitLabel: string; onSave: (value: Form) => Promise<boolean>; onCancel: () => void }) {
   const [form, setForm] = useState(initial);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
+  const uploadingRef = useRef(false);
+  const uploadedRef = useRef<{ path: string } | null>(null);
   const set = <K extends keyof Form>(key: K, value: Form[K]) => setForm(current => ({ ...current, [key]: value }));
+  const removeUploadedFile = async () => {
+    const uploaded = uploadedRef.current;
+    uploadedRef.current = null;
+    if (!uploaded) return;
+    const { error } = await createBrowserClient().storage.from(UGC_BUCKET).remove([uploaded.path]);
+    if (error) console.error('[ugc-videos] unable to clean up unsaved upload', error);
+  };
   const upload = async (file: File) => {
+    if (uploadingRef.current || pending) return;
     if (!(file instanceof File)) { toast.error('UGC upload failed: selected value is not a file.'); return; }
     if (!file.name || file.size === 0) { toast.error('UGC upload failed: selected video is empty.'); return; }
     if (!isSupportedVideo(file)) { toast.error('Choose an MP4, WebM, or MOV video file.'); return; }
-    if (file.size > 50 * 1024 * 1024) { toast.error('Video files must be 50MB or smaller.'); return; }
+    if (file.size > MAX_VIDEO_BYTES) { toast.error('Video files must be 50 MiB or smaller.'); return; }
+    const extension = extensionFor(file);
+    if (!extension) { toast.error('Choose an MP4, WebM, or MOV video file.'); return; }
+    uploadingRef.current = true;
     setUploading(true);
     try {
-      const data = new FormData(); data.append('video', file);
-      // Do not set Content-Type here. The browser adds the multipart boundary.
-      const response = await fetch('/api/admin/ugc-videos/upload', { method: 'POST', body: data });
-      const responseType = response.headers.get('content-type') ?? '';
-      if (!responseType.includes('application/json')) {
-        throw new Error(`UGC upload endpoint returned ${response.status} ${response.statusText || 'response'} instead of JSON.`);
-      }
-      const uploaded = await response.json() as UploadResult;
-      if (!uploaded.success) throw new Error(uploaded.error);
-      setForm(current => ({ ...current, videoUrl: uploaded.data.videoUrl }));
+      const path = `uploads/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${extension}`;
+      const storage = createBrowserClient().storage.from(UGC_BUCKET);
+      const { error } = await storage.upload(path, file, { contentType: MIME_BY_EXTENSION[extension], cacheControl: '31536000', upsert: false });
+      if (error) throw error;
+      const { data } = storage.getPublicUrl(path);
+      if (!data.publicUrl) throw new Error('Public UGC URL was not created');
+      await removeUploadedFile();
+      uploadedRef.current = { path };
+      setForm(current => ({ ...current, videoUrl: data.publicUrl }));
       toast.success('Video uploaded. Add its details and save.');
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Video upload failed'); }
-    finally { setUploading(false); }
+    finally { uploadingRef.current = false; setUploading(false); }
   };
   const submit = () => {
+    if (uploadingRef.current || pending) return;
     if (!form.videoUrl) { toast.error('Upload a video before saving.'); return; }
-    startTransition(() => { void onSave(form); });
+    startTransition(() => { void (async () => {
+      if (await onSave(form)) uploadedRef.current = null;
+      else {
+        await removeUploadedFile();
+        setForm(current => ({ ...current, videoUrl: initial.videoUrl ?? '' }));
+      }
+    })(); });
   };
   return <div style={{ display:'grid', gap:12 }}>
     <div>
       <label style={{ ...S.m, fontSize:9, letterSpacing:'.16em', textTransform:'uppercase', color:'#6B6B63', display:'block', marginBottom:6 }}>Video *</label>
-      {form.videoUrl ? <div style={{ display:'flex', gap:10, alignItems:'center' }}><video src={form.videoUrl} controls preload="metadata" style={{ width:100, height:120, objectFit:'cover', background:'#1A1A18' }} /><button type="button" onClick={() => fileRef.current?.click()} style={{ ...input, width:'auto', cursor:'pointer' }}>Replace video</button></div> : <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} style={{ width:'100%', minHeight:100, border:'1px dashed #B8965A', background:'#F5F0E8', cursor:'pointer', color:'#6B6B63', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:8 }}><Upload size={18} color="#B8965A" /><span style={{ ...S.m, fontSize:9, letterSpacing:'.14em', textTransform:'uppercase' }}>{uploading ? 'Uploadingâ€¦' : 'Upload UGC video'}</span></button>}
-      <input ref={fileRef} type="file" accept="video/*" onChange={event => { const file = event.target.files?.[0]; if (file) void upload(file); event.target.value = ''; }} hidden />
+      {form.videoUrl ? <div style={{ display:'flex', gap:10, alignItems:'center' }}><video src={form.videoUrl} controls preload="metadata" style={{ width:100, height:120, objectFit:'cover', background:'#1A1A18' }} /><button type="button" disabled={uploading||pending} onClick={() => fileRef.current?.click()} style={{ ...input, width:'auto', cursor:'pointer' }}>{uploading ? 'Uploading…' : 'Replace video'}</button></div> : <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading||pending} style={{ width:'100%', minHeight:100, border:'1px dashed #B8965A', background:'#F5F0E8', cursor:'pointer', color:'#6B6B63', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:8 }}><Upload size={18} color="#B8965A" /><span style={{ ...S.m, fontSize:9, letterSpacing:'.14em', textTransform:'uppercase' }}>{uploading ? 'Uploading…' : 'Upload UGC video'}</span></button>}
+      <input ref={fileRef} type="file" accept="video/*,.mp4,.webm,.mov" onChange={event => { const file = event.target.files?.[0]; if (file) void upload(file); event.target.value = ''; }} hidden />
     </div>
     <div className="ugc-admin-grid"><div><label style={{...S.m,fontSize:9,letterSpacing:'.16em',textTransform:'uppercase',color:'#6B6B63',display:'block',marginBottom:6}}>Customer name</label><input value={form.customerName} onChange={e=>set('customerName',e.target.value)} style={input} /></div><div><label style={{...S.m,fontSize:9,letterSpacing:'.16em',textTransform:'uppercase',color:'#6B6B63',display:'block',marginBottom:6}}>Display order</label><input type="number" min="0" value={form.position} onChange={e=>set('position',Number(e.target.value))} style={input} /></div></div>
     <div><label style={{...S.m,fontSize:9,letterSpacing:'.16em',textTransform:'uppercase',color:'#6B6B63',display:'block',marginBottom:6}}>Caption</label><textarea value={form.caption} maxLength={280} rows={3} onChange={e=>set('caption',e.target.value)} style={{...input,resize:'vertical'}} /></div>
     <button type="button" onClick={()=>set('isVisible',!form.isVisible)} style={{ ...input, cursor:'pointer', textAlign:'left', color:form.isVisible?'#B8965A':'#6B6B63' }}>{form.isVisible ? 'Visible on storefront' : 'Hidden from storefront'}</button>
-    <div style={{ display:'flex', justifyContent:'flex-end', gap:8 }}><button type="button" onClick={onCancel} style={{padding:'9px 15px',border:'1px solid #EDE8DC',background:'#F5F0E8',cursor:'pointer',...S.m,fontSize:9,textTransform:'uppercase',letterSpacing:'.12em'}}>Cancel</button><button type="button" disabled={pending||uploading} onClick={submit} style={{padding:'9px 15px',border:0,background:'#1A1A18',color:'#FAFAF7',cursor:'pointer',...S.m,fontSize:9,textTransform:'uppercase',letterSpacing:'.12em'}}><Check size={12} /> {pending?'Savingâ€¦':submitLabel}</button></div>
+    <div style={{ display:'flex', justifyContent:'flex-end', gap:8 }}><button type="button" disabled={uploading||pending} onClick={() => { void removeUploadedFile().finally(onCancel); }} style={{padding:'9px 15px',border:'1px solid #EDE8DC',background:'#F5F0E8',cursor:'pointer',...S.m,fontSize:9,textTransform:'uppercase',letterSpacing:'.12em'}}>Cancel</button><button type="button" disabled={pending||uploading} onClick={submit} style={{padding:'9px 15px',border:0,background:'#1A1A18',color:'#FAFAF7',cursor:'pointer',...S.m,fontSize:9,textTransform:'uppercase',letterSpacing:'.12em'}}><Check size={12} /> {pending?'Savingâ€¦':submitLabel}</button></div>
     <style>{` .ugc-admin-grid { display:grid; grid-template-columns:1fr 130px; gap:12px; } @media(max-width:560px){.ugc-admin-grid{grid-template-columns:1fr;}} `}</style>
   </div>;
 }
@@ -71,7 +97,10 @@ export function UgcVideosClient({ initialVideos }: { initialVideos: AdminUgcVide
       toast.success('UGC video saved');
       setAdding(false);
       router.refresh();
-    } else toast.error(result.error);
+      return true;
+    }
+    toast.error(result.error);
+    return false;
   };
 
   const saveEdit = async (id: string, data: Form) => {
@@ -80,7 +109,10 @@ export function UgcVideosClient({ initialVideos }: { initialVideos: AdminUgcVide
       toast.success('UGC video updated');
       setEditing(null);
       router.refresh();
-    } else toast.error(result.error);
+      return true;
+    }
+    toast.error(result.error);
+    return false;
   };
 
   const remove = async (id: string) => {
