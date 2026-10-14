@@ -18,8 +18,7 @@ const S = {
 const navLinks = [
   { href: "/products", label: "Collections" },
   { href: "/products?category=summer", label: "Summer" },
-  { href: "/products?category=winter", label: "Winter" },
-  { href: "/products?category=bundle", label: "Gift Sets" },
+  { href: "/products?category=winter", label: "WINTER" },
   { href: "/contact", label: "Contact" },
 ];
 

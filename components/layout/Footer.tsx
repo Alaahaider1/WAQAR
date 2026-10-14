@@ -44,9 +44,9 @@ export function Footer() {
             </p>
             <div style={{ display: "flex", gap: 16, marginTop: 24 }}>
               {[
-                { href: "https://maisonlumiere.com", Icon: Globe, label: "Website" },
-                { href: "mailto:hello@maisonlumiere.com", Icon: Mail, label: "Email" },
-                { href: "tel:+33123456789", Icon: Phone, label: "Phone" },
+                { href: "https://https://waqar-five.vercel.app", Icon: Globe, label: "Website" },
+                { href: "mailto:mo2alaa01067507800@gmail.com", Icon: Mail, label: "Email" },
+                { href: "tel:+20 10 67507800", Icon: Phone, label: "Phone" },
               ].map(({ href, Icon, label }) => (
                 <a
                   key={label}

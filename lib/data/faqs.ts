@@ -24,41 +24,13 @@ export const faqs: FAQ[] = [
     category: "shipping",
   },
   {
-    id: "s2",
-    question: "Do you ship internationally?",
-    answer:
-      "Yes, we ship to over 40 countries worldwide. International shipping rates and delivery times vary by destination and are calculated at checkout. Please note that customs duties and import taxes may apply and are the responsibility of the recipient.",
-    category: "shipping",
-  },
-  {
     id: "s3",
     question: "How is my order packaged?",
     answer:
       "Every WAQAR order is shipped in our signature ivory gift box, hand-wrapped in gold tissue paper and sealed with our wax stamp. The outer shipping box is reinforced with custom inserts to protect your fragrance during transit. This packaging is suitable for gifting directly upon receipt.",
     category: "shipping",
   },
-  {
-    id: "s4",
-    question: "Will I receive tracking information?",
-    answer:
-      "Yes. Once your order is dispatched, you will receive an email with a tracking number and a link to monitor your shipment in real time. For international orders, tracking is available up to the destination country's postal network.",
-    category: "shipping",
-  },
-  {
-    id: "s5",
-    question: "Do you offer free shipping?",
-    answer:
-      "We offer complimentary standard shipping on all orders over EGP 150 within the continental United States. International orders qualify for free shipping on purchases over EGP 300.",
-    category: "shipping",
-  },
   // Returns
-  {
-    id: "r1",
-    question: "What is your return policy?",
-    answer:
-      "We accept returns within 30 days of delivery for unopened, sealed bottles in their original packaging. Due to the nature of fragrances — which are personal-use items — we are unable to accept returns on opened or partially used products. Gift orders may be exchanged within 60 days.",
-    category: "returns",
-  },
   {
     id: "r2",
     question: "How do I initiate a return?",
@@ -132,24 +104,10 @@ export const faqs: FAQ[] = [
     category: "orders",
   },
   {
-    id: "o2",
-    question: "Can I modify or cancel an order after placing it?",
-    answer:
-      "Orders can be modified or cancelled within 2 hours of placement, before they enter our fulfilment process. Please contact us immediately at hello@maisonlumiere.com with your order number. Once an order has been dispatched, it cannot be cancelled but may be returned under our standard policy.",
-    category: "orders",
-  },
-  {
     id: "o3",
     question: "What payment methods do you accept?",
     answer:
-      "We accept all major credit and debit cards (Visa, Mastercard, American Express), as well as Apple Pay, Google Pay, and PayPal. All transactions are secured with 256-bit SSL encryption. We do not store card details — payments are processed through our certified payment partners.",
-    category: "orders",
-  },
-  {
-    id: "o4",
-    question: "Do you offer gift wrapping?",
-    answer:
-      "Every WAQAR order is already presented in our signature gift packaging — there is no additional charge for this. For a more personalised gift experience, you may add a handwritten note at checkout. Gift sets and gift sets also include a dedicated outer presentation box.",
+      "We accept all major credit and debit cards (Vodafon Cash, Etisalat Cash,We Cash, Insta pay ,...). All transactions are secured with 256-bit SSL encryption. We do not store card details — payments are processed through our certified payment partners.",
     category: "orders",
   },
   // Care
@@ -164,14 +122,14 @@ export const faqs: FAQ[] = [
     id: "c2",
     question: "How do I apply fragrance correctly?",
     answer:
-      "Apply to pulse points — wrists, the base of the throat, behind the ears, and inner elbows — where body heat amplifies diffusion. Do not rub your wrists together after application, as this crushes the top notes. For longevity, apply to moisturised skin or spray lightly onto hair. A single application of 2–3 sprays is typically sufficient.",
+      "Apply it to pulse points—where body heat enhances the fragrance's diffusion. Avoid rubbing your wrists together after application, as this diminishes the top notes. For long-lasting wear, apply to hydrated skin, ideally using 5 to 12 sprays.",
     category: "care",
   },
   {
     id: "c3",
     question: "Can I layer fragrances?",
     answer:
-      "Fragrance layering is an art we actively encourage. As a starting point, pair our lighter, fresher scents with warmer base-note-heavy fragrances (Pure Amber, Dark Vanilla). Apply the lighter scent first, then layer the richer fragrance on top. Our Discovery Set is an excellent way to explore combinations.",
+      "The art of fragrance layering: To start, blend our light, refreshing scents with fragrances featuring warm base notes (such as pure amber and dark vanilla). Apply the lighter fragrance first, then apply the richer scent alongside it.",
     category: "care",
   },
 ];

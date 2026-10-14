@@ -13,12 +13,20 @@ const faqs = [
     a: "Our Eau de Parfum concentrations typically last 8–12 hours on skin. Pulse points — wrists, neck, inner elbows — maximise projection and longevity. Extrait de Parfum formulations can last up to 24 hours.",
   },
   {
-    q: "Do you offer samples before committing to a full bottle?",
-    a: "Yes. We offer a Discovery Set of five 2ml vials from our core collection, available in our Gift Sets section. We also offer single sample vials upon request — contact us and our team will help you find your perfect scent.",
+    q: "Can I modify or cancel my order after placing it?",
+    a: "We understand that plans can change. You may request a modification or cancellation before your order has been shipped. Once your order has been dispatched, changes may no longer be possible. Please contact our customer service team as soon as possible, and we'll do our best to assist you.",
   },
   {
-    q: "What is your return policy?",
-    a: "We accept returns within 30 days of delivery for unopened, sealed bottles. Due to the nature of fragrances, we cannot accept returns on opened products. Gift orders may be exchanged within 60 days.",
+    q: " What if my order arrives damaged?",
+    a:"Your experience matters to us. If your order arrives damaged, please photograph the damage and contact our customer service team within hours of delivery We'll review the issue and arrange a replacement or a full refund, including shipping costs, in accordance with our damaged-order policy.Customer Service: 01153784455",
+  },
+  {
+    q: " Are your perfumes safe for the skin?",
+    a:"Our fragrances are crafted using perfumery ingredients, including 96% ethyl alcohol. As with any fragranced product, we recommend reviewing the ingredients and testing a small amount on your skin before regular use. If irritation occurs, discontinue use.",
+  },
+  {
+    q: " Can you help me choose a fragrance for a specific occasion??",
+    a:"Absolutely. Whether you're looking for an everyday signature scent, something refined for the office, a fresh fragrance for university, or a captivating scent for a special evening, we're here to help you find the perfect match.",
   },
 ];
 

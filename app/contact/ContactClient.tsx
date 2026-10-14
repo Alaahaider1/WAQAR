@@ -13,12 +13,9 @@ const S = {
 } as const;
 
 const SUBJECTS = [
-  "General Enquiry",
-  "Order Support",
+  "Product & Fragrance Advice",
+  "Orders & Delivery",
   "Returns & Exchanges",
-  "Wholesale & Partnerships",
-  "Press & Media",
-  "Other",
 ];
 
 export function ContactClient() {
@@ -27,6 +24,7 @@ export function ContactClient() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [focused, setFocused] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState("");
 
   const set = (k: string, v: string) => {
     setValues((p) => ({ ...p, [k]: v }));
@@ -47,9 +45,23 @@ export function ContactClient() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setLoading(false);
-    setSent(true);
+    setSubmitError("");
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(result?.error || "We couldn’t send your message. Please try again.");
+      }
+      setSent(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "We couldn’t send your message. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputStyle = (name: string, multiline = false) => ({
@@ -73,7 +85,7 @@ export function ContactClient() {
             Contact <em>WAQAR</em>
           </h1>
           <p style={{ ...S.body, fontSize: 14, color: "#6B6B63", lineHeight: 1.8, marginTop: 16, maxWidth: 480 }}>
-            We respond to every enquiry personally. Our team is available Monday–Friday, 9am–6pm CET.
+            We respond to every enquiry personally. Our team is available every time.
           </p>
         </div>
         <GoldDivider />
@@ -126,6 +138,7 @@ export function ContactClient() {
                     {errors.message && <p style={{ ...S.body, fontSize: 11, color: "#cc4444", marginTop: 4 }}>{errors.message}</p>}
                   </div>
 
+                  {submitError && <p role="alert" style={{ ...S.body, fontSize: 12, color: "#cc4444", margin: 0 }}>{submitError}</p>}
                   <button type="submit" disabled={loading} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "14px 32px", backgroundColor: "#1A1A18", color: "#FAFAF7", border: "none", cursor: loading ? "not-allowed" : "pointer", ...S.mono, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", opacity: loading ? 0.7 : 1, transition: "background-color 0.3s" }}
                     onMouseEnter={e => !loading && ((e.currentTarget as HTMLButtonElement).style.backgroundColor = "#6B6B63")}
                     onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1A1A18")}

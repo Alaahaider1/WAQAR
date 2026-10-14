@@ -40,7 +40,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
       >
         {/* Image */}
-        <div style={{ position: "relative", overflow: "hidden", backgroundColor: "#F5F0E8", aspectRatio: "3/4", marginBottom: 16 }}>
+        <div className="product-card-image" style={{ position: "relative", overflow: "hidden", backgroundColor: "#F5F0E8", aspectRatio: "3/4", marginBottom: 16 }}>
           <Image
             src={product.image}
             alt={product.name}
@@ -147,6 +147,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </div>
         </div>
       </motion.article>
+      <style>{`
+        @media (max-width: 640px) {
+          .product-card-image { aspect-ratio: 4 / 5 !important; }
+          .product-card-image > img { object-fit: contain !important; }
+        }
+      `}</style>
     </Link>
   );
 }

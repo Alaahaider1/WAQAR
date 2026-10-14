@@ -29,6 +29,7 @@ export function ProductGallery({ images, name }: ProductGalleryProps) {
       <div className="product-gallery" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {/* Main image */}
       <div
+        className="product-gallery-main-image"
         onMouseEnter={() => setZoomed(true)}
         onMouseLeave={() => setZoomed(false)}
         onMouseMove={handleMouseMove}
@@ -56,6 +57,7 @@ export function ProductGallery({ images, name }: ProductGalleryProps) {
               priority={active === 0}
               style={{
                 objectFit: "cover",
+                objectPosition: "center",
                 transformOrigin: `${mousePos.x}% ${mousePos.y}%`,
                 transform: zoomed ? "scale(1.85)" : "scale(1)",
                 transition: zoomed ? "transform 0.1s ease-out" : "transform 0.4s ease",
@@ -103,6 +105,7 @@ export function ProductGallery({ images, name }: ProductGalleryProps) {
       <style>{`
         @media (max-width: 520px) {
           .product-gallery { min-width: 0; max-width: 100%; }
+          .product-gallery-main-image > div img { object-fit: contain !important; }
           .product-gallery-thumbnails { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
           .product-gallery-thumbnails::-webkit-scrollbar { display: none; }
         }

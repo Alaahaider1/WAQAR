@@ -79,6 +79,24 @@ body {
 }
 
 @media (max-width: 760px) {
+  .why-choose-us-container {
+    padding: 56px clamp(16px, 5vw, 40px) !important;
+  }
+
+  .why-choose-us-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 24px 20px !important;
+  }
+
+  .why-choose-us-grid > * {
+    min-width: 0;
+  }
+
+  .why-choose-us-grid h3,
+  .why-choose-us-grid p {
+    overflow-wrap: anywhere;
+  }
+
   .featured-categories-container {
     padding: 56px 16px !important;
   }

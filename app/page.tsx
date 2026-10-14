@@ -18,15 +18,14 @@ export const metadata: Metadata = {
     "Discover WAQAR's collection of luxury fragrances. Crafted from the rarest natural ingredients since 1987.",
 };
 
-async function HomeSocialProof() {
-  const [ugcVideos, customerFeedback] = await Promise.all([
-    fetchPublicUgcVideos(),
-    fetchPublicCustomerFeedback(),
-  ]);
-  return <>
-    <UgcVideoTestimonials videos={ugcVideos} />
-    <CustomerFeedback images={customerFeedback} />
-  </>;
+async function HomeUgcVideos() {
+  const videos = await fetchPublicUgcVideos();
+  return <UgcVideoTestimonials videos={videos} />;
+}
+
+async function HomeCustomerFeedback() {
+  const images = await fetchPublicCustomerFeedback();
+  return <CustomerFeedback images={images} />;
 }
 
 export default function HomePage() {
@@ -37,9 +36,12 @@ export default function HomePage() {
       <BestSellers />
       <NewArrivals />
       <BrandStory />
+      <Suspense fallback={null}>
+        <HomeUgcVideos />
+      </Suspense>
       <WhyChooseUs />
       <Suspense fallback={null}>
-        <HomeSocialProof />
+        <HomeCustomerFeedback />
       </Suspense>
       <FAQPreview />
       <Newsletter />
