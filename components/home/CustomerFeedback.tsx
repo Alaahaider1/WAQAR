@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 import type { CustomerFeedbackImage } from '@/src/types/domain';
 
 export function CustomerFeedback({ images }: { images: CustomerFeedbackImage[] }) {
@@ -136,10 +137,13 @@ export function CustomerFeedback({ images }: { images: CustomerFeedbackImage[] }
                 alignSelf: 'flex-start',
               }}
             >
-              <img
+              <Image
                 src={image.imageUrl}
-                alt="WAQAR customer feedback"
+                alt="Customer feedback"
                 loading="lazy"
+                width={800}
+                height={1000}
+                sizes="(max-width: 760px) 82vw, (max-width: 900px) 33vw, 25vw"
                 style={{
                   display: 'block',
                   width: '100%',
