@@ -11,6 +11,7 @@ import { formatPrice } from "@/lib/utils/formatPrice";
 import { GoldDivider } from "@/components/ui/GoldDivider";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { validateCouponAction } from "@/src/actions/coupon.actions";
+import { SHIPPING_FEE } from "@/src/lib/shipping";
 
 const S = {
   display: { fontFamily: "'Cormorant Garamond', Georgia, serif" },
@@ -38,7 +39,7 @@ export function CartClient() {
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const discount = appliedCoupon?.discountAmount ?? 0;
-  const shipping = subtotal >= 150 ? 0 : 12;
+  const shipping = SHIPPING_FEE;
   const total = subtotal - discount + shipping;
 
   const handleApplyCoupon = async () => {
@@ -205,12 +206,11 @@ export function CartClient() {
                 )}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <span style={{ ...S.body, fontSize: 13, color: "#6B6B63", display: "flex", alignItems: "center", gap: 6 }}>
-                    <Truck size={12} strokeWidth={1.5} style={{ color: shipping === 0 ? "#B8965A" : "#6B6B63" }} />
+                    <Truck size={12} strokeWidth={1.5} style={{ color: "#6B6B63" }} />
                     Shipping
                   </span>
                   <div style={{ textAlign: "right" }}>
-                    <span style={{ ...S.mono, fontSize: 13, color: shipping === 0 ? "#B8965A" : "#1A1A18", display: "block" }}>{shipping === 0 ? "Free" : formatPrice(shipping)}</span>
-                    {subtotal > 0 && subtotal < 150 && <span style={{ ...S.mono, fontSize: 9, color: "#B8965A", display: "block", marginTop: 2 }}>Add {formatPrice(150 - subtotal)} for free shipping</span>}
+                    <span style={{ ...S.mono, fontSize: 13, color: "#1A1A18", display: "block" }}>{formatPrice(shipping)}</span>
                   </div>
                 </div>
               </div>

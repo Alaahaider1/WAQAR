@@ -373,9 +373,6 @@ export interface SiteSettings {
   storeCurrencySymbol: string;
   taxRate: number;
   taxIncluded: boolean;
-  shippingFreeThreshold: number;
-  shippingStandardRate: number;
-  shippingExpressRate: number;
   shippingStandardDays: string;
   shippingExpressDays: string;
   shippingProvider: string;

@@ -134,7 +134,7 @@ begin
     raise exception 'One or more products are no longer available' using errcode = '22023';
   end if;
 
-  v_shipping := case when v_subtotal >= 150 then 0 else 12 end;
+  v_shipping := 80;
   v_total := v_subtotal + v_shipping;
   v_address := jsonb_build_object(
     'fullName', concat_ws(' ', nullif(trim(p_first_name), ''), nullif(trim(p_last_name), '')),

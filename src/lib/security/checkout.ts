@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SHIPPING_FEE } from '../shipping.ts';
 
 export const PlaceOrderSchema = z.object({
   checkoutAttemptId: z.string().uuid(),
@@ -58,6 +59,6 @@ export function priceCheckoutItems(
     };
   });
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal >= 150 ? 0 : 12;
+  const shipping = SHIPPING_FEE;
   return { items, subtotal, shipping, total: subtotal + shipping };
 }

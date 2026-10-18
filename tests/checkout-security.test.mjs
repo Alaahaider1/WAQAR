@@ -33,8 +33,24 @@ test('checkout derives names, images, SKU and price from the server catalog', ()
   assert.equal(priced.items[0].variantId, variantId);
   assert.equal(priced.items[0].sku, 'WQ-50');
   assert.equal(priced.subtotal, 400);
-  assert.equal(priced.shipping, 0);
-  assert.equal(priced.total, 400);
+  assert.equal(priced.shipping, 80);
+  assert.equal(priced.total, 480);
+});
+
+test('server checkout always charges EGP 80 regardless of subtotal', () => {
+  const parsed = PlaceOrderSchema.parse(request);
+  const forgedShipping = PlaceOrderSchema.parse({ ...request, shipping: 0, shippingFee: 0 });
+  assert.equal('shipping' in forgedShipping, false);
+  for (const [price, expectedTotal] of [[55, 135], [150, 230], [5000, 5080]]) {
+    const priced = priceCheckoutItems([{ id: productId, quantity: 1 }], [{
+      id: productId, name: 'WAQAR Perfume', default_variant_id: variantId,
+      default_variant_sku: 'WQ-50', default_variant_size: '50ml',
+      default_variant_price: price, primary_image_url: null,
+    }]);
+    assert.equal(priced.shipping, 80);
+    assert.equal(priced.total, expectedTotal);
+  }
+  assert.equal(parsed.items[0].quantity, 2);
 });
 
 test('checkout rejects unavailable products and invalid quantities', () => {
@@ -107,7 +123,7 @@ test('server payload fingerprint uses normalized validated fields and excludes c
 });
 
 test('atomic checkout SQL fingerprints retries and reuses one catalog resolution', async () => {
-  const sql = await readFile(new URL('../supabase/migrations/20261006000000_atomic_guest_checkout.sql', import.meta.url), 'utf8');
+  const sql = await readFile(new URL('../supabase/migrations/20261018000000_fixed_shipping_fee.sql', import.meta.url), 'utf8');
   assert.equal((sql.match(/public\.storefront_products/g) ?? []).length, 1);
   assert.match(sql, /checkout_payload_fingerprint is distinct from p_payload_fingerprint/);
   assert.match(sql, /on conflict \(checkout_attempt_id\).*?do nothing/s);
@@ -122,6 +138,25 @@ test('atomic checkout SQL fingerprints retries and reuses one catalog resolution
   assert.doesNotMatch(sql, /\b(?:commit|rollback)\b/i);
   assert.match(sql, /revoke all on function[\s\S]*?from public, anon, authenticated/);
   assert.match(sql, /grant execute on function[\s\S]*?to service_role/);
+  assert.match(sql, /v_shipping := 80/);
+  assert.match(sql, /new\.shipping_amount := 80/);
+  assert.match(sql, /new\.total := new\.subtotal - coalesce\(new\.discount_amount, 0\) \+ 80/);
+  assert.match(sql, /delete from public\.site_settings where key in[\s\S]*shipping_express_rate/);
+  assert.doesNotMatch(sql, /v_subtotal\s*>=\s*150|shipping[^;]*:=\s*0/i);
+});
+
+test('shipping fee shown in cart and checkout comes from the fixed shared constant', async () => {
+  const [cart, checkout, product, constant] = await Promise.all([
+    readFile(new URL('../app/cart/CartClient.tsx', import.meta.url), 'utf8'),
+    readFile(new URL('../app/checkout/CheckoutClient.tsx', import.meta.url), 'utf8'),
+    readFile(new URL('../app/products/[id]/ProductDetailClient.tsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/lib/shipping.ts', import.meta.url), 'utf8'),
+  ]);
+  assert.match(constant, /SHIPPING_FEE = 80/);
+  assert.match(cart, /const shipping = SHIPPING_FEE/);
+  assert.match(checkout, /const shipping = SHIPPING_FEE/);
+  assert.match(product, /Shipping costs EGP 80/);
+  assert.doesNotMatch(cart + checkout + product, /Free shipping|shipping === 0|subtotal >= 150/i);
 });
 
 test('storefront products keep the URL slug separate from the database UUID used by checkout', () => {

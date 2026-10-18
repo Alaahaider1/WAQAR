@@ -11,6 +11,7 @@ import { useCatalogProducts } from "@/lib/catalog/CatalogProvider";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import { GoldDivider } from "@/components/ui/GoldDivider";
 import { placeOrderAction } from "@/src/actions/order.actions";
+import { SHIPPING_FEE } from "@/src/lib/shipping";
 import {
   CHECKOUT_ATTEMPT_REUSED_MESSAGE,
   clearCheckoutAttemptId,
@@ -85,7 +86,7 @@ export function CheckoutClient() {
   const checkoutAttemptFingerprint = useRef<string | null>(null);
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const shipping = subtotal >= 150 ? 0 : 12;
+  const shipping = SHIPPING_FEE;
   const total = subtotal + shipping;
 
   const set = (name: string, val: string) => {
@@ -530,7 +531,7 @@ export function CheckoutClient() {
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <span style={{ ...S.body, fontSize: 13, color: "#6B6B63" }}>Shipping</span>
-                  <span style={{ ...S.mono, fontSize: 13, color: shipping === 0 ? "#B8965A" : "#1A1A18" }}>{shipping === 0 ? "Free" : formatPrice(shipping)}</span>
+                  <span style={{ ...S.mono, fontSize: 13, color: "#1A1A18" }}>{formatPrice(shipping)}</span>
                 </div>
               </div>
 

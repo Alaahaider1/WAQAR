@@ -30,6 +30,7 @@ export function BrandStory() {
                 gridTemplateColumns: "1fr 1fr",
                 gap: 12,
               }}
+              className="brand-story-collage"
             >
               <div
                 style={{
@@ -39,11 +40,13 @@ export function BrandStory() {
                   overflow: "hidden",
                   backgroundColor: "#F5F0E8",
                 }}
+                className="brand-story-image brand-story-image-primary"
               >
                 <Image
                   src="/1.jpeg"
                   alt="Perfumer crafting a fragrance"
                   fill
+                  className="brand-story-image-element"
                   style={{ objectFit: "cover" }}
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
@@ -54,13 +57,15 @@ export function BrandStory() {
                   position: "relative",
                   aspectRatio: "4/3",
                   overflow: "hidden",
-                  backgroundColor: "#F5F0E8",
+                  backgroundColor: "#45473F",
                 }}
+                className="brand-story-image brand-story-image-secondary"
               >
                 <Image
                   src="/2.jpeg"
                   alt="Natural perfume ingredients"
                   fill
+                  className="brand-story-image-element"
                   style={{ objectFit: "cover" }}
                   sizes="(max-width: 768px) 45vw, 25vw"
                 />
@@ -73,11 +78,13 @@ export function BrandStory() {
                   overflow: "hidden",
                   backgroundColor: "#F5F0E8",
                 }}
+                className="brand-story-image brand-story-image-tertiary"
               >
                 <Image
                   src="/3.png"
                   alt="WAQAR perfume studio"
                   fill
+                  className="brand-story-image-element"
                   style={{ objectFit: "cover" }}
                   sizes="(max-width: 768px) 45vw, 25vw"
                 />
@@ -227,42 +234,65 @@ export function BrandStory() {
         }
 
         @media (max-width: 768px) {
+          .brand-story-collage {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 8px !important;
+          }
+
+          .brand-story-image-primary {
+            aspect-ratio: 5 / 6 !important;
+          }
+
+          .brand-story-image-secondary,
+          .brand-story-image-tertiary {
+            aspect-ratio: 2 / 3 !important;
+          }
+
+          .brand-story-image-element {
+            object-fit: contain !important;
+          }
+
+          .brand-story-image-primary .brand-story-image-element {
+            object-position: center top;
+          }
+
           .brand-story-grid {
             grid-template-columns: minmax(0, 1fr) !important;
             gap: 48px !important;
           }
 
           .brand-story-stamp {
-            bottom: -12px;
-            right: 8px;
-            padding: 10px 13px;
-            max-width: 48%;
+            bottom: 4px;
+            right: 4px;
+            padding: 5px 7px;
+            max-width: calc(50% - 8px);
           }
 
           .brand-story-stamp-title {
-            font-size: clamp(18px, 5vw, 24px);
+            font-size: 15px;
           }
 
           .brand-story-stamp-subtitle {
-            font-size: 7px;
-            letter-spacing: 0.16em;
-            margin-top: 5px;
+            font-size: 5px;
+            letter-spacing: 0.12em;
+            margin-top: 3px;
           }
         }
 
         @media (max-width: 380px) {
           .brand-story-stamp {
-            right: 5px;
-            padding: 8px 10px;
-            max-width: 46%;
+            right: 4px;
+            bottom: 4px;
+            padding: 4px 6px;
+            max-width: calc(50% - 8px);
           }
 
           .brand-story-stamp-title {
-            font-size: 18px;
+            font-size: 14px;
           }
 
           .brand-story-stamp-subtitle {
-            font-size: 6px;
+            font-size: 5px;
             letter-spacing: 0.12em;
           }
         }

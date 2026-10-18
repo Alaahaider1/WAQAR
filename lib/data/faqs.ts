@@ -23,19 +23,12 @@ export const faqs: FAQ[] = [
       "Standard delivery takes 3–5 business days within the continental US, and 5–10 business days for international orders. Express shipping (1–2 business days) is available at checkout for an additional charge.",
     category: "shipping",
   },
-  {
-    id: "s3",
-    question: "How is my order packaged?",
-    answer:
-      "Every WAQAR order is shipped in our signature ivory gift box, hand-wrapped in gold tissue paper and sealed with our wax stamp. The outer shipping box is reinforced with custom inserts to protect your fragrance during transit. This packaging is suitable for gifting directly upon receipt.",
-    category: "shipping",
-  },
   // Returns
   {
     id: "r2",
     question: "How do I initiate a return?",
     answer:
-      "To begin a return, contact our team at returns@maisonlumiere.com with your order number and reason for return. We will provide a prepaid return shipping label and instructions within 24 business hours. Refunds are processed within 5–7 business days of receiving the returned item.",
+      "To begin a return, contact our team at mo2alaa01067507800@gmail.com with your order number and reason for return. We will provide a prepaid return shipping label and instructions within 24 business hours. Refunds are processed within 5–7 business days of receiving the returned item.",
     category: "returns",
   },
   {
@@ -49,7 +42,7 @@ export const faqs: FAQ[] = [
     id: "r4",
     question: "What if my order arrives damaged?",
     answer:
-      "In the rare event that your order arrives damaged, please photograph the damage and contact us within 48 hours of delivery at hello@maisonlumiere.com. We will arrange a replacement or full refund at no cost to you, including return shipping.",
+      "In the rare event that your order arrives damaged, please photograph the damage and contact us within 48 hours of delivery at mo2alaa01067507800@gmail.com. We will arrange a replacement or full refund at no cost to you, including return shipping.",
     category: "returns",
   },
   // Products
@@ -75,13 +68,6 @@ export const faqs: FAQ[] = [
     category: "products",
   },
   {
-    id: "p4",
-    question: "Are WAQAR fragrances cruelty-free?",
-    answer:
-      "Yes, absolutely. We do not test on animals at any stage of production, and we do not work with suppliers who conduct animal testing. Several of our fragrances are also vegan — please check individual product pages for details. We are Leaping Bunny certified.",
-    category: "products",
-  },
-  {
     id: "p5",
     question: "What percentage of natural ingredients do you use?",
     answer:
@@ -100,7 +86,7 @@ export const faqs: FAQ[] = [
     id: "o1",
     question: "How do I track my order?",
     answer:
-      "Once your order is confirmed, you will receive an email confirmation immediately. When your order is dispatched (typically within 1–2 business days), a second email with tracking information is sent. You can also log into your account at any time to view order status.",
+      "Once your order is confirmed, you will receive an message confirmation immediately. When your order is dispatched (typically within 1–2 business days), a second email with tracking information is sent. You can also log into your account at any time to view order status.",
     category: "orders",
   },
   {
