@@ -139,8 +139,8 @@ export default async function AdminProductsPage({
               return (
                 <tr key={p.id} style={{ borderBottom: i < rows.length - 1 ? "1px solid #EDE8DC" : "none" }}>
                   <td style={{ padding:"10px 14px", width:56 }}>
-                    <div style={{ width:44, height:44, backgroundColor:"#F5F0E8", overflow:"hidden" }}>
-                      {img?.url && <img src={img.url} alt={p.name} style={{ width:"100%", height:"100%", objectFit:"cover" }} />}
+                    <div style={{ width:44 }}>
+                      {img?.url && <img src={img.url} alt={p.name} style={{ display:"block", width:"100%", height:"auto" }} />}
                     </div>
                   </td>
                   <td style={{ padding:"10px 14px", maxWidth:180 }}>

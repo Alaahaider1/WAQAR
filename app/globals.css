@@ -126,9 +126,6 @@ body {
     scroll-snap-align: start;
   }
 
-  .featured-category-card {
-    aspect-ratio: 4 / 3 !important;
-  }
 }
 
 /* Smooth scroll */

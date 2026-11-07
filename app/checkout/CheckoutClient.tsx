@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Banknote, ChevronDown, ShoppingBag, ArrowLeft, Lock } from "lucide-react";
@@ -507,8 +506,8 @@ export function CheckoutClient() {
                     <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 20 }}>
                       {items.map((item) => (
                         <div key={item.product.id} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                          <div style={{ position: "relative", width: 52, height: 52, backgroundColor: "#FAFAF7", flexShrink: 0 }}>
-                            <Image src={item.product.image} alt={item.product.name} fill style={{ objectFit: "cover" }} sizes="52px" />
+                          <div style={{ position: "relative", width: 52, flexShrink: 0 }}>
+                            <img src={item.product.image} alt={item.product.name} style={{ display: "block", width: "100%", height: "auto" }} />
                             <span style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", backgroundColor: "#1A1A18", color: "#FAFAF7", ...S.mono, fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center" }}>{item.quantity}</span>
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>

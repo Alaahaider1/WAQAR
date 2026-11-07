@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
@@ -75,19 +74,16 @@ function CategoryCard({ cat }: { cat: FeaturedCategory }) {
         animate={{ y: hovered ? -4 : 0 }}
         transition={{ duration: 0.3 }}
         className="featured-category-card"
-        style={{ position: "relative", overflow: "hidden", aspectRatio: "3/4", backgroundColor: "#F5F0E8" }}
+        style={{ position: "relative" }}
       >
         {cat.image ? (
-          <Image
+          <img
             src={cat.image}
             alt={cat.label}
-            fill
-            unoptimized
-            style={{ objectFit: "cover", transition: "transform 0.7s ease", transform: hovered ? "scale(1.05)" : "scale(1)" }}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            style={{ display: "block", width: "100%", height: "auto" }}
           />
         ) : (
-          <div style={{ position: "absolute", inset: 0, backgroundColor: "#F5F0E8" }} />
+          <div style={{ width: "100%", minHeight: 180, backgroundColor: "#F5F0E8" }} />
         )}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(26,26,24,0.75) 0%, transparent 55%)" }} />
 

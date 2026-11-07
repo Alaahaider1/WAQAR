@@ -25,21 +25,14 @@ export const faqs: FAQ[] = [
   },
   // Returns
   {
-    id: "r2",
+    id: "r1",
     question: "How do I initiate a return?",
     answer:
       "To begin a return, contact our team at mo2alaa01067507800@gmail.com with your order number and reason for return. We will provide a prepaid return shipping label and instructions within 24 business hours. Refunds are processed within 5–7 business days of receiving the returned item.",
     category: "returns",
   },
   {
-    id: "r3",
-    question: "Can I exchange a fragrance I have received as a gift?",
-    answer:
-      "Yes. Gift recipients may exchange an unopened fragrance for store credit or a different product within 60 days of the original purchase date. Please contact us with the order number from the gift receipt or the name of the purchaser.",
-    category: "returns",
-  },
-  {
-    id: "r4",
+    id: "r2",
     question: "What if my order arrives damaged?",
     answer:
       "In the rare event that your order arrives damaged, please photograph the damage and contact us within 48 hours of delivery at mo2alaa01067507800@gmail.com. We will arrange a replacement or full refund at no cost to you, including return shipping.",

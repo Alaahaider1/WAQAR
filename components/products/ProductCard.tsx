@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ShoppingBag, Star } from "lucide-react";
@@ -40,13 +39,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
         transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
       >
         {/* Image */}
-        <div className="product-card-image" style={{ position: "relative", overflow: "hidden", backgroundColor: "#F5F0E8", aspectRatio: "3/4", marginBottom: 16 }}>
-          <Image
+        <div className="product-card-image" style={{ position: "relative", marginBottom: 16 }}>
+          <img
             src={product.image}
             alt={product.name}
-            fill
-            style={{ objectFit: "cover", transition: "transform 0.7s ease", transform: hovered ? "scale(1.05)" : "scale(1)" }}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            style={{ display: "block", width: "100%", height: "auto" }}
           />
 
           {/* Badges */}
@@ -149,8 +146,15 @@ export function ProductCard({ product, className }: ProductCardProps) {
       </motion.article>
       <style>{`
         @media (max-width: 640px) {
-          .product-card-image { aspect-ratio: 4 / 5 !important; }
-          .product-card-image > img { object-fit: contain !important; }
+          .product-listing-card .product-card-image { margin-bottom: 8px !important; }
+          .product-listing-card .product-card-image > div { top: 6px !important; left: 6px !important; gap: 4px !important; }
+          .product-listing-card .product-card-image > div > span { font-size: 7px !important; letter-spacing: 0.1em !important; padding: 3px 5px !important; }
+          .product-listing-card .product-card-image .product-quick-add { padding: 8px 2px !important; font-size: 8px !important; letter-spacing: 0.12em !important; gap: 5px !important; }
+          .product-listing-card h3 { font-size: 16px !important; overflow-wrap: anywhere; }
+          .product-listing-card > article > div:last-child { gap: 5px !important; }
+          .product-listing-card > article > div:last-child > div:last-child { flex-wrap: wrap; gap: 4px !important; }
+          .product-listing-card > article > div:last-child > div:last-child > span:first-child { font-size: 11px !important; }
+          .product-listing-card > article > div:last-child > div:last-child > span:last-child { font-size: 9px !important; }
         }
       `}</style>
     </Link>

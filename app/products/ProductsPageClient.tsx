@@ -109,7 +109,7 @@ export default function ProductsPageClient({ categories }: { categories: Collect
         subtitle="Twenty singular worlds. Each one a story written in scent."
       />
 
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 40px 80px" }}>
+      <div className="product-listing-container" style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 40px 80px" }}>
 
         {/* ── Toolbar ── */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32, flexWrap: "wrap" }}>
@@ -269,7 +269,7 @@ export default function ProductsPageClient({ categories }: { categories: Collect
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 28 }}
+                  style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 28 }}
                   className="product-grid"
                 >
                   {paginated.map((product, i) => (
@@ -279,7 +279,7 @@ export default function ProductsPageClient({ categories }: { categories: Collect
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: i * 0.05 }}
                     >
-                      <ProductCard product={product} />
+                      <ProductCard product={product} className="product-listing-card" />
                     </motion.div>
                   ))}
                 </motion.div>
@@ -371,9 +371,12 @@ export default function ProductsPageClient({ categories }: { categories: Collect
       <GoldDivider />
 
       <style>{`
-        @media (max-width: 1024px) { .sidebar-desktop { display: none !important; } .lg-hide { display: flex !important; } .product-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+        @media (max-width: 1024px) { .sidebar-desktop { display: none !important; } .lg-hide { display: flex !important; } .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
         @media (min-width: 1024px) { .lg-hide { display: none !important; } }
-        @media (max-width: 520px) { .product-grid { grid-template-columns: 1fr !important; } }
+        @media (max-width: 640px) {
+          .product-listing-container { padding: 28px 16px 56px !important; }
+          .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 20px 12px !important; }
+        }
       `}</style>
     </>
   );

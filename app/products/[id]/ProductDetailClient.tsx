@@ -25,7 +25,7 @@ const S = {
 
 const GUARANTEES = [
   { Icon: Truck, label: "Shipping costs EGP 80" },
-  { Icon: RefreshCw, label: "30-day returns" },
+  { Icon: RefreshCw, label: "5-day returns" },
   { Icon: Shield, label: "Authentic & sealed" },
 ];
 

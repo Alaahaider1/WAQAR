@@ -225,8 +225,8 @@ export function ProductForm({ initial={}, onSubmit, submitLabel, loading }: { in
         {images.length > 0 && (
           <div style={{ display:"flex", flexWrap:"wrap", gap:10, marginBottom:14 }}>
             {images.map((url,i)=>(
-              <div key={`${url}-${i}`} style={{ position:"relative", width:80, height:80, backgroundColor:"#F5F0E8", flexShrink:0, border:`2px solid ${i===mainIdx?"#B8965A":"transparent"}`, transition:"border-color 0.2s" }}>
-                <img src={url} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
+              <div key={`${url}-${i}`} style={{ position:"relative", width:80, flexShrink:0, border:`2px solid ${i===mainIdx?"#B8965A":"transparent"}`, transition:"border-color 0.2s" }}>
+                <img src={url} alt="" style={{ display:"block", width:"100%", height:"auto" }}/>
                 {/* Main badge */}
                 {i===mainIdx && <span style={{ position:"absolute", bottom:2, left:2, ...S.m, fontSize:7, backgroundColor:"#B8965A", color:"#FAFAF7", padding:"1px 4px", textTransform:"uppercase" as const, letterSpacing:"0.08em" }}>Main</span>}
                 {/* Controls overlay */}

@@ -115,7 +115,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 Luxury Perfumery
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#6B6B63", marginTop: 4 }}>
-                Est. 1987
+                Est. 2025
               </p>
             </div>
           </motion.div>

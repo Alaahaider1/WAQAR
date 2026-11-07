@@ -35,14 +35,14 @@ export default function HomePage() {
       <FeaturedCategories />
       <BestSellers />
       <NewArrivals />
-      <BrandStory />
+      <Suspense fallback={null}>
+        <HomeCustomerFeedback />
+      </Suspense>
       <Suspense fallback={null}>
         <HomeUgcVideos />
       </Suspense>
       <WhyChooseUs />
-      <Suspense fallback={null}>
-        <HomeCustomerFeedback />
-      </Suspense>
+      <BrandStory />
       <FAQPreview />
       <Newsletter />
     </>

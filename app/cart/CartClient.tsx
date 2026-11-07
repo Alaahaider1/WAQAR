@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Minus, Plus, X, ShoppingBag, ArrowRight, Tag, Truck, Check } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
@@ -134,8 +133,8 @@ export function CartClient() {
 
                     {/* Product */}
                     <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-                      <Link href={`/products/${item.product.id}`} style={{ position: "relative", width: 76, height: 76, flexShrink: 0, backgroundColor: "#F5F0E8", display: "block" }}>
-                        <Image src={item.product.image} alt={item.product.name} fill style={{ objectFit: "cover" }} sizes="76px" />
+                      <Link href={`/products/${item.product.id}`} style={{ width: 76, flexShrink: 0, display: "block" }}>
+                        <img src={item.product.image} alt={item.product.name} style={{ display: "block", width: "100%", height: "auto" }} />
                       </Link>
                       <div>
                         <Link href={`/products/${item.product.id}`} style={{ textDecoration: "none" }}>

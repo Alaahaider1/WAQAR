@@ -4,7 +4,6 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useStorefrontProducts } from "@/lib/hooks/useStorefrontProducts";
 import { formatPrice } from "@/lib/utils/formatPrice";
 
@@ -159,13 +158,11 @@ export function SearchDropdown({ onClose }: Props) {
                     }}
                   >
                     {/* Product image */}
-                    <div style={{ width: 44, height: 44, backgroundColor: "#F5F0E8", flexShrink: 0, position: "relative", overflow: "hidden" }}>
-                      <Image
+                    <div style={{ width: 44, flexShrink: 0 }}>
+                      <img
                         src={p.image}
                         alt={p.name}
-                        fill
-                        style={{ objectFit: "cover" }}
-                        sizes="44px"
+                        style={{ display: "block", width: "100%", height: "auto" }}
                       />
                     </div>
 

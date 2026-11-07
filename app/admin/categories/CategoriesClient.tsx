@@ -99,7 +99,7 @@ function CatForm({ initial = EMPTY, onSave, onCancel, label }: { initial?: FD; o
         <button type="button" disabled={uploading || pending} onClick={()=>fileRef.current?.click()} style={{ padding:"8px 14px", border:"1px solid #EDE8DC", backgroundColor:"#F5F0E8", cursor:uploading?"wait":"pointer", ...S.m, fontSize:9, letterSpacing:"0.12em", textTransform:"uppercase" as const, color:"#1A1A18", opacity:uploading?0.65:1 }}>
           {uploading ? "Uploading…" : form.imageUrl ? "Replace Image" : "Upload Image"}
         </button>
-        {form.imageUrl && <img src={form.imageUrl} alt="Category image preview" style={{ display:"block", width:180, height:96, objectFit:"cover", marginTop:10, border:"1px solid #EDE8DC" }} />}
+        {form.imageUrl && <img src={form.imageUrl} alt="Category image preview" style={{ display:"block", width:180, height:"auto", marginTop:10, border:"1px solid #EDE8DC" }} />}
         {uploadError && <p role="alert" style={{ ...S.b, fontSize:11, color:"#cc4444", marginTop:6 }}>{uploadError}</p>}
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"12px 16px" }}>
@@ -181,9 +181,9 @@ export function CategoriesClient({ initialCategories }: { initialCategories: Cat
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:16 }}>
         {initialCategories.map(cat => (
           <div key={cat.id} style={{ backgroundColor:"#FAFAF7", border:"1px solid #EDE8DC", overflow:"hidden" }}>
-            <div style={{ position:"relative", height:110, backgroundColor:"#F5F0E8", overflow:"hidden" }}>
+            <div style={{ position:"relative", backgroundColor:cat.imageUrl ? "transparent" : "#F5F0E8", minHeight:cat.imageUrl ? undefined : 110 }}>
               {cat.imageUrl
-                ? <img src={cat.imageUrl} alt={cat.name} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                ? <img src={cat.imageUrl} alt={cat.name} style={{ display:"block", width:"100%", height:"auto" }} />
                 : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center" }}><Tag size={28} strokeWidth={1} style={{ color:"#EDE8DC" }} /></div>
               }
               <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top, rgba(26,26,24,0.5) 0%, transparent 60%)" }} />
