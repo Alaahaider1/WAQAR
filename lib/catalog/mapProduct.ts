@@ -1,4 +1,4 @@
-import type { Product as StorefrontProduct } from '@/lib/data/products';
+import type { Product as StorefrontProduct, ProductSizeVariant } from '@/lib/data/products';
 import type { Product as DomainProduct, ProductSummary } from '@/src/types/domain';
 import type { StorefrontProductRow } from '@/src/types/database';
 
@@ -7,7 +7,24 @@ type StorefrontCatalogRow = Pick<StorefrontProductRow,
   | 'base_price' | 'compare_at_price' | 'default_variant_size' | 'primary_image_url'
   | 'description' | 'is_best_seller' | 'is_new' | 'is_featured' | 'rating'
   | 'review_count' | 'available_quantity' | 'allow_backorder'
+  | 'default_variant_id' | 'default_variant_sku'
 >;
+
+function mapCatalogVariants(row: StorefrontCatalogRow): ProductSizeVariant[] {
+  if (row.default_variant_id && row.default_variant_size && row.default_variant_price != null) {
+    return [{
+      id: row.default_variant_id,
+      sku: row.default_variant_sku ?? '',
+      size: row.default_variant_size,
+      price: Number(row.default_variant_price),
+      compareAtPrice: row.compare_at_price == null ? null : Number(row.compare_at_price),
+      isDefault: true,
+      availableQuantity: row.available_quantity,
+      allowBackorder: row.allow_backorder,
+    }];
+  }
+  return [];
+}
 
 /** Map a storefront view row to the legacy UI Product shape (slug as id). */
 export function rowToStorefrontProduct(row: StorefrontCatalogRow): StorefrontProduct {
@@ -20,6 +37,8 @@ export function rowToStorefrontProduct(row: StorefrontCatalogRow): StorefrontPro
     price: Number(row.default_variant_price ?? row.base_price),
     originalPrice: row.compare_at_price != null ? Number(row.compare_at_price) : undefined,
     size: row.default_variant_size ?? '50ml',
+    defaultVariantId: row.default_variant_id,
+    variants: mapCatalogVariants(row),
     image: row.primary_image_url ?? '',
     gallery: row.primary_image_url ? [row.primary_image_url] : [],
     // Notes/tags are loaded on the product detail page; listing uses summaries only.
@@ -47,6 +66,17 @@ export function summaryToStorefrontProduct(s: ProductSummary): StorefrontProduct
     price: s.defaultVariantPrice ?? s.basePrice,
     originalPrice: s.compareAtPrice ?? undefined,
     size: s.defaultVariantSize ?? '50ml',
+    defaultVariantId: s.defaultVariantId,
+    variants: s.defaultVariantId && s.defaultVariantSize && s.defaultVariantPrice != null ? [{
+      id: s.defaultVariantId,
+      sku: '',
+      size: s.defaultVariantSize,
+      price: s.defaultVariantPrice,
+      compareAtPrice: s.compareAtPrice,
+      isDefault: true,
+      availableQuantity: s.availableQuantity,
+      allowBackorder: s.allowBackorder,
+    }] : [],
     image: s.primaryImageUrl ?? '',
     gallery: s.primaryImageUrl ? [s.primaryImageUrl] : [],
     description: '',
@@ -74,6 +104,17 @@ export function domainToStorefrontProduct(p: DomainProduct): StorefrontProduct {
     price: defaultVariant?.price ?? p.basePrice,
     originalPrice: p.compareAtPrice ?? undefined,
     size: defaultVariant?.size ?? '50ml',
+    defaultVariantId: defaultVariant?.id ?? null,
+    variants: p.variants.filter((variant) => variant.isActive).map((variant) => ({
+      id: variant.id,
+      sku: variant.sku,
+      size: variant.size,
+      price: variant.price,
+      compareAtPrice: variant.compareAtPrice,
+      isDefault: variant.isDefault,
+      availableQuantity: variant.availableQuantity,
+      allowBackorder: variant.allowBackorder,
+    })),
     image: p.images[0]?.url ?? '',
     gallery: p.images.map((i) => i.url),
     description: p.description ?? '',

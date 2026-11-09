@@ -18,8 +18,8 @@ export function createCheckoutPayloadFingerprint(input: ValidatedCheckout) {
     country: input.country,
     paymentMethod: input.paymentMethod,
     items: input.items
-      .map(({ id, quantity }) => ({ id, quantity }))
-      .sort((a, b) => a.id.localeCompare(b.id)),
+      .map(({ id, variantId, quantity }) => ({ id, variantId, quantity }))
+      .sort((a, b) => a.id.localeCompare(b.id) || a.variantId.localeCompare(b.variantId)),
   };
 
   return createHash('sha256').update(JSON.stringify(normalizedPayload)).digest('hex');

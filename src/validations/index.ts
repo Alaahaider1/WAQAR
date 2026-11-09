@@ -8,6 +8,7 @@
  */
 
 import { z } from 'zod';
+import { normalizeSizeLabel, parseSizeMilliliters } from '../../lib/catalog/sizeLabels';
 import { ValidationError } from '@/src/lib/errors';
 import type { ZodSchema } from 'zod';
 
@@ -123,9 +124,10 @@ export type CategoryInput = z.infer<typeof CategorySchema>;
 // ---------------------------------------------------------------------------
 
 export const ProductVariantSchema = z.object({
+  id: uuidSchema.optional(),
   sku: z.string().min(1, 'SKU is required').max(100).toUpperCase().trim(),
   size: z.string().min(1, 'Size is required').max(50).trim(),
-  concentration: z.string().max(50).trim().optional().or(z.literal('')),
+  concentration: z.string().max(50).trim().nullable().optional().or(z.literal('')),
   price: priceSchema.positive('Price must be greater than zero'),
   compareAtPrice: priceSchema.optional().nullable(),
   isDefault: z.boolean().optional().default(false),
@@ -133,6 +135,35 @@ export const ProductVariantSchema = z.object({
   isActive: z.boolean().optional().default(true),
 });
 export type ProductVariantInput = z.infer<typeof ProductVariantSchema>;
+
+const productVariantsSchema = z.array(ProductVariantSchema).min(1, 'Add at least one size').max(20)
+  .superRefine((variants, context) => {
+    const activeVariants = variants.filter((variant) => variant.isActive !== false);
+    if (activeVariants.length === 0) {
+      context.addIssue({ code: 'custom', message: 'At least one size must be available' });
+    }
+    if (activeVariants.filter((variant) => variant.isDefault).length !== 1) {
+      context.addIssue({ code: 'custom', message: 'Choose one available default size' });
+    }
+
+    const sizes = new Set<string>();
+    const skus = new Set<string>();
+    for (const variant of activeVariants) {
+      if (parseSizeMilliliters(variant.size) === null) {
+        context.addIssue({ code: 'custom', message: 'Available sizes must be a positive milliliter amount' });
+      }
+      const normalizedSize = normalizeSizeLabel(variant.size);
+      const normalizedSku = variant.sku.toLowerCase();
+      if (sizes.has(normalizedSize)) {
+        context.addIssue({ code: 'custom', message: 'Available sizes must be unique' });
+      }
+      if (skus.has(normalizedSku)) {
+        context.addIssue({ code: 'custom', message: 'Available size SKUs must be unique' });
+      }
+      sizes.add(normalizedSize);
+      skus.add(normalizedSku);
+    }
+  });
 
 export const ProductImageSchema = z.object({
   url: z.string().url('Must be a valid URL'),
@@ -165,7 +196,7 @@ export const ProductSchema = z.object({
   isFeatured: z.boolean().optional().default(false),
   seoTitle: z.string().max(70).trim().optional().or(z.literal('')),
   seoDescription: z.string().max(160).trim().optional().or(z.literal('')),
-  variants: z.array(ProductVariantSchema).min(1, 'At least one variant is required'),
+  variants: productVariantsSchema,
   images: z.array(ProductImageSchema).optional().default([]),
   fragranceNotes: z.array(FragranceNoteSchema).optional().default([]),
   tagIds: z.array(uuidSchema).optional().default([]),
@@ -173,7 +204,7 @@ export const ProductSchema = z.object({
 export type ProductInput = z.infer<typeof ProductSchema>;
 
 export const UpdateProductSchema = ProductSchema.partial().extend({
-  variants: z.array(ProductVariantSchema).optional(),
+  variants: productVariantsSchema.optional(),
 });
 export type UpdateProductInput = z.infer<typeof UpdateProductSchema>;
 

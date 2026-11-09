@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Minus, Plus, X, ShoppingBag, ArrowRight, Tag, Truck, Check } from "lucide-react";
-import { useCartStore } from "@/lib/store/cartStore";
+import { getCartItemKey, useCartStore } from "@/lib/store/cartStore";
 import { useCatalogProducts } from "@/lib/catalog/CatalogProvider";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import { GoldDivider } from "@/components/ui/GoldDivider";
@@ -29,14 +29,25 @@ export function CartClient() {
   ]));
   const items = storedItems.flatMap((item) => {
     const product = productsById.get(item.productId);
-    return product ? [{ product, quantity: item.quantity, cartProductId: item.productId }] : [];
+    if (!product) return [];
+    const variants = Array.isArray(product.variants) ? product.variants : [];
+    const variant = item.variantId
+      ? variants.find((candidate) => candidate.id === item.variantId) ?? (
+        item.variantSize && typeof item.unitPrice === "number"
+          ? { id: item.variantId, sku: "", size: item.variantSize, price: item.unitPrice, compareAtPrice: null, isDefault: false, availableQuantity: 0, allowBackorder: false }
+          : undefined
+      )
+      : variants.find((candidate) => candidate.isDefault);
+    const selectedPrice = variant && Number.isFinite(variant.price) && variant.price > 0 ? variant.price : null;
+    return [{ product, variant, quantity: item.quantity, cartProductId: getCartItemKey(item), size: variant?.size ?? item.variantSize ?? "Unavailable size", price: selectedPrice ?? item.unitPrice ?? 0 }];
   });
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number; label: string } | null>(null);
   const [couponError, setCouponError] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
 
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const hasUnavailableItems = items.some((item) => !item.variant);
   const discount = appliedCoupon?.discountAmount ?? 0;
   const shipping = SHIPPING_FEE;
   const total = subtotal - discount + shipping;
@@ -122,7 +133,7 @@ export function CartClient() {
             <AnimatePresence initial={false}>
               {items.map((item) => (
                 <motion.div
-                  key={item.product.id}
+                  key={item.cartProductId}
                   layout
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -140,7 +151,7 @@ export function CartClient() {
                         <Link href={`/products/${item.product.id}`} style={{ textDecoration: "none" }}>
                           <p style={{ ...S.display, fontSize: 17, fontWeight: 300, color: "#1A1A18", margin: "0 0 3px", lineHeight: 1.2 }}>{item.product.name}</p>
                         </Link>
-                        <p style={{ ...S.mono, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6B6B63", margin: 0 }}>{item.product.subtitle} · {item.product.size}</p>
+                        <p style={{ ...S.mono, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6B6B63", margin: 0 }}>{item.product.subtitle} · {item.size}</p>
                       </div>
                     </div>
 
@@ -157,8 +168,8 @@ export function CartClient() {
 
                     {/* Price */}
                     <div>
-                      <p style={{ ...S.mono, fontSize: 13, color: "#1A1A18", margin: 0, textAlign: "right" }}>{formatPrice(item.product.price * item.quantity)}</p>
-                      {item.quantity > 1 && <p style={{ ...S.mono, fontSize: 9, color: "#6B6B63", marginTop: 2, textAlign: "right" }}>{formatPrice(item.product.price)} ea.</p>}
+                      <p style={{ ...S.mono, fontSize: 13, color: "#1A1A18", margin: 0, textAlign: "right" }}>{formatPrice(item.price * item.quantity)}</p>
+                      {item.quantity > 1 && <p style={{ ...S.mono, fontSize: 9, color: "#6B6B63", marginTop: 2, textAlign: "right" }}>{formatPrice(item.price)} ea.</p>}
                     </div>
 
                     {/* Remove */}
@@ -249,12 +260,12 @@ export function CartClient() {
               )}
 
               {/* Checkout CTA */}
-              <Link href="/checkout"
+              <Link href={hasUnavailableItems ? "/cart" : "/checkout"}
                 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#1A1A18", color: "#FAFAF7", padding: "14px", textDecoration: "none", ...S.mono, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 14, transition: "background-color 0.3s" }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#6B6B63")}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = "#1A1A18")}
               >
-                Proceed to Checkout <ArrowRight size={12} />
+                {hasUnavailableItems ? "Remove unavailable sizes to continue" : <>Proceed to Checkout <ArrowRight size={12} /></>}
               </Link>
 
               {/* Payment badges */}

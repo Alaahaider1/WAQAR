@@ -96,6 +96,7 @@ export interface ProductVariant {
   compareAtPrice: number | null;
   isDefault: boolean;
   isActive: boolean;
+  position: number;
   availableQuantity: number;
   allowBackorder: boolean;
 }

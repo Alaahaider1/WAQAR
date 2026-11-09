@@ -19,6 +19,8 @@ export type Product = {
   price: number;
   originalPrice?: number;
   size: string;
+  defaultVariantId: string | null;
+  variants: ProductSizeVariant[];
   image: string;
   gallery: string[];
   description: string;
@@ -32,4 +34,15 @@ export type Product = {
   reviewCount: number;
   inStock: boolean;
   tags: string[];
+};
+
+export type ProductSizeVariant = {
+  id: string;
+  sku: string;
+  size: string;
+  price: number;
+  compareAtPrice: number | null;
+  isDefault: boolean;
+  availableQuantity: number;
+  allowBackorder: boolean;
 };

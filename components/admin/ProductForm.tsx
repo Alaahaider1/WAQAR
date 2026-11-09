@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Upload, X, Plus, ImageIcon, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { normalizeSizeLabel, parseSizeMilliliters } from "@/lib/catalog/sizeLabels";
 
 const S = { d:{fontFamily:"'Cormorant Garamond',Georgia,serif"}, b:{fontFamily:"'DM Sans',system-ui,sans-serif"}, m:{fontFamily:"'DM Mono',monospace"} } as const;
 
@@ -12,12 +13,20 @@ export type ProductFormData = {
   description: string;
   longDescription: string;
   category: "summer" | "winter" | "bundle";
-  price: number;
   originalPrice?: number;
   discount: number;
   stock: number;
-  sku: string;
-  size: string;
+  variants: Array<{
+    id?: string;
+    size: string;
+    price: number;
+    compareAtPrice?: number | null;
+    concentration?: string | null;
+    position?: number;
+    sku: string;
+    isDefault: boolean;
+    isActive: boolean;
+  }>;
   image: string;
   gallery: string[];
   noteTop: string;
@@ -34,8 +43,8 @@ export type ProductFormData = {
 
 const EMPTY: ProductFormData = {
   name:"", subtitle:"", description:"", longDescription:"",
-  category:"summer", price:0, originalPrice:undefined, discount:0,
-  stock:0, sku:"", size:"50ml", image:"", gallery:[],
+  category:"summer", originalPrice:undefined, discount:0,
+  stock:0, variants:[{ size:"50ml", price:0, sku:"", isDefault:true, isActive:true }], image:"", gallery:[],
   noteTop:"", noteHeart:"", noteBase:"", ingredients:"",
   isBestSeller:false, isNew:false, isFeatured:false,
   status:"published", inStock:true, tags:[],
@@ -63,7 +72,7 @@ function Textarea({ value, onChange, placeholder, rows=3 }: { value:string; onCh
 }
 
 export function ProductForm({ initial={}, onSubmit, submitLabel, loading }: { initial?:Partial<ProductFormData>; onSubmit:(d:ProductFormData)=>void; submitLabel:string; loading?:boolean }) {
-  const [form, setForm] = useState<ProductFormData>({...EMPTY,...initial});
+  const [form, setForm] = useState<ProductFormData>({...EMPTY,...initial, variants:initial.variants ?? EMPTY.variants});
   const [errors, setErrors] = useState<Partial<Record<keyof ProductFormData,string>>>({});
   const [images, setImages] = useState<string[]>(
     initial.gallery?.length ? initial.gallery : initial.image ? [initial.image] : []
@@ -80,10 +89,46 @@ export function ProductForm({ initial={}, onSubmit, submitLabel, loading }: { in
   const validate = () => {
     const e: typeof errors = {};
     if (!form.name.trim()) e.name = "Product name is required";
-    if (!form.sku.trim()) e.sku = "SKU is required";
-    if (form.price <= 0) e.price = "Price must be greater than 0";
+    const availableVariants = form.variants.filter((variant) => variant.isActive);
+    if (availableVariants.length === 0) e.variants = "Make at least one size available";
+    if (availableVariants.filter((variant) => variant.isDefault).length !== 1) e.variants = "Choose one available default size";
+    if (availableVariants.some((variant) => parseSizeMilliliters(variant.size) === null || variant.price <= 0 || !variant.sku.trim())) {
+      e.variants = "Each available size needs a positive ML size, price, and SKU";
+    }
+    const sizes = availableVariants.map((variant) => normalizeSizeLabel(variant.size));
+    const skus = availableVariants.map((variant) => variant.sku.trim().toLowerCase());
+    if (new Set(sizes).size !== sizes.length || new Set(skus).size !== skus.length) {
+      e.variants = "Available size names and SKUs must be unique";
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
+  };
+
+  const updateVariant = (index:number, changes:Partial<ProductFormData["variants"][number]>) => {
+    set("variants", form.variants.map((variant, i) => i === index ? { ...variant, ...changes } : variant));
+  };
+
+  const setDefaultVariant = (index:number) => {
+    set("variants", form.variants.map((variant, i) => ({ ...variant, isDefault: i === index })));
+  };
+
+  const toggleVariantAvailability = (index:number, isActive:boolean) => {
+    let variants = form.variants.map((variant, i) => i === index ? { ...variant, isActive } : variant);
+    if (!isActive && variants[index].isDefault) {
+      const fallback = variants.findIndex((variant, i) => i !== index && variant.isActive);
+      variants = variants.map((variant, i) => ({ ...variant, isDefault: i === fallback }));
+    }
+    set("variants", variants);
+  };
+
+  const removeVariant = (index:number) => {
+    const removedDefault = form.variants[index]?.isDefault;
+    let variants = form.variants.filter((_, i) => i !== index);
+    if (removedDefault && variants.length > 0 && !variants.some((variant) => variant.isDefault && variant.isActive)) {
+      const fallback = variants.findIndex((variant) => variant.isActive);
+      variants = variants.map((variant, i) => ({ ...variant, isDefault: i === fallback }));
+    }
+    set("variants", variants);
   };
 
   const addUrl = () => {
@@ -157,12 +202,10 @@ export function ProductForm({ initial={}, onSubmit, submitLabel, loading }: { in
             <Input value={form.name} onChange={v=>set("name",v)} placeholder="e.g. Golden Light" error={errors.name}/>
             {errors.name && <p style={{ ...S.b, fontSize:11, color:"#cc4444", marginTop:3 }}>{errors.name}</p>}
           </div>
-          {[["subtitle","Subtitle","e.g. Eau de Parfum",true],["size","Size","e.g. 50ml",true]].map(([k,l,ph,half])=>(
-            <div key={k as string} style={{ gridColumn: half?"span 1":"1/-1" }}>
-              <label style={{ ...S.m, fontSize:9, letterSpacing:"0.18em", textTransform:"uppercase" as const, color:"#6B6B63", display:"block", marginBottom:5 }}>{l as string}</label>
-              <Input value={(form as unknown as Record<string,string|number>)[k as string] as string} onChange={v=>set(k as keyof ProductFormData, v as ProductFormData[keyof ProductFormData])} placeholder={ph as string}/>
-            </div>
-          ))}
+          <div>
+            <label style={{ ...S.m, fontSize:9, letterSpacing:"0.18em", textTransform:"uppercase" as const, color:"#6B6B63", display:"block", marginBottom:5 }}>Subtitle</label>
+            <Input value={form.subtitle} onChange={v=>set("subtitle",v)} placeholder="e.g. Eau de Parfum"/>
+          </div>
           <div style={{ gridColumn:"1/-1" }}>
             <label style={{ ...S.m, fontSize:9, letterSpacing:"0.18em", textTransform:"uppercase" as const, color:"#6B6B63", display:"block", marginBottom:5 }}>Short Description</label>
             <Textarea value={form.description} onChange={v=>set("description",v)} placeholder="One-line description for product cards…" rows={2}/>
@@ -174,22 +217,56 @@ export function ProductForm({ initial={}, onSubmit, submitLabel, loading }: { in
         </div>
       </div>
 
+      {/* Available Sizes */}
+      <div style={card}>
+        <h3 style={heading}>Available Sizes</h3>
+        <p style={{ ...S.b, fontSize:12, color:"#6B6B63", margin:"-8px 0 16px" }}>Each available size uses its own configured price. Removing an existing size from this form deactivates its record and preserves order history.</p>
+        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+          {form.variants.map((variant,index)=>(
+            <div key={variant.id ?? `new-${index}`} className="pf-variant-row" style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1.3fr auto auto auto", gap:10, alignItems:"end", padding:12, border:"1px solid #EDE8DC", backgroundColor:variant.isActive?"#FAFAF7":"#F5F0E8" }}>
+              <span style={{ gridColumn:"1 / -1", ...S.m, fontSize:8, letterSpacing:"0.12em", textTransform:"uppercase", color:"#6B6B63" }}>{variant.id ? "Existing variant · record preserved" : "New variant · saved as a new record"}</span>
+              <div>
+                <label style={{ ...S.m, fontSize:8, letterSpacing:"0.12em", textTransform:"uppercase" as const, color:"#6B6B63", display:"block", marginBottom:5 }}>Size</label>
+                <Input value={variant.size} onChange={value=>updateVariant(index,{size:value})} placeholder="50ml"/>
+              </div>
+              <div>
+                <label style={{ ...S.m, fontSize:8, letterSpacing:"0.12em", textTransform:"uppercase" as const, color:"#6B6B63", display:"block", marginBottom:5 }}>Catalog Price (EGP)</label>
+                <Input type="number" value={variant.price || ""} onChange={value=>updateVariant(index,{price:value?Number(value):0})} placeholder="350"/>
+              </div>
+              <div>
+                <label style={{ ...S.m, fontSize:8, letterSpacing:"0.12em", textTransform:"uppercase" as const, color:"#6B6B63", display:"block", marginBottom:5 }}>SKU</label>
+                <Input value={variant.sku} onChange={value=>updateVariant(index,{sku:value})} placeholder="AMBER-50"/>
+              </div>
+              <label style={{ display:"flex", alignItems:"center", gap:6, minHeight:42, ...S.b, fontSize:11, color:"#1A1A18", whiteSpace:"nowrap" }}>
+                <input type="radio" name="default-size" checked={variant.isDefault} disabled={!variant.isActive} onChange={()=>setDefaultVariant(index)}/>
+                Default
+              </label>
+              <label style={{ display:"flex", alignItems:"center", gap:6, minHeight:42, ...S.b, fontSize:11, color:"#1A1A18", whiteSpace:"nowrap" }}>
+                <input type="checkbox" checked={variant.isActive} onChange={event=>toggleVariantAvailability(index,event.target.checked)}/>
+                Available
+              </label>
+              <button type="button" onClick={()=>removeVariant(index)} aria-label={`Remove ${variant.size || "size"}`} style={{ width:34, height:40, border:"1px solid #EDE8DC", background:"#F5F0E8", color:"#6B6B63", cursor:"pointer" }}><X size={13}/></button>
+            </div>
+          ))}
+        </div>
+        {errors.variants && <p role="alert" style={{ ...S.b, fontSize:11, color:"#cc4444", margin:"10px 0 0" }}>{errors.variants}</p>}
+        <button type="button" onClick={()=>set("variants",[...form.variants,{size:"",price:0,sku:"",isDefault:form.variants.length===0,isActive:true}])}
+          style={{ display:"flex", alignItems:"center", gap:7, marginTop:14, padding:"9px 13px", border:"1px solid #EDE8DC", backgroundColor:"#F5F0E8", color:"#1A1A18", cursor:"pointer", ...S.m, fontSize:9, letterSpacing:"0.12em", textTransform:"uppercase" as const }}>
+          <Plus size={12}/> Add Size
+        </button>
+      </div>
+
       {/* Pricing & Inventory */}
       <div style={card}>
         <h3 style={heading}>Pricing &amp; Inventory</h3>
         <div className="pf-grid4">
-          {([["price","Price (EGP) *",true],["originalPrice","Original Price",false],["discount","Discount (%)",false],["stock","Stock Units",false]] as [keyof ProductFormData,string,boolean][]).map(([k,l,req])=>(
+          {([["originalPrice","Compare at price (default size)"],["discount","Discount (%)"],["stock","Stock Units (default size)"]] as [keyof ProductFormData,string][]).map(([k,l])=>(
             <div key={k}>
               <label style={{ ...S.m, fontSize:9, letterSpacing:"0.18em", textTransform:"uppercase" as const, color:errors[k]?"#cc4444":"#6B6B63", display:"block", marginBottom:5 }}>{l}</label>
               <Input type="number" value={(form[k] as number)??""} onChange={v=>set(k, v?Number(v):undefined as ProductFormData[typeof k])} error={errors[k]}/>
               {errors[k] && <p style={{ ...S.b, fontSize:11, color:"#cc4444", marginTop:3 }}>{errors[k]}</p>}
             </div>
           ))}
-          <div>
-            <label style={{ ...S.m, fontSize:9, letterSpacing:"0.18em", textTransform:"uppercase" as const, color:errors.sku?"#cc4444":"#6B6B63", display:"block", marginBottom:5 }}>SKU *</label>
-            <Input value={form.sku} onChange={v=>set("sku",v)} placeholder="ML-EXAMPLE-50" error={errors.sku}/>
-            {errors.sku && <p style={{ ...S.b, fontSize:11, color:"#cc4444", marginTop:3 }}>{errors.sku}</p>}
-          </div>
           <div>
             <label style={{ ...S.m, fontSize:9, letterSpacing:"0.18em", textTransform:"uppercase" as const, color:"#6B6B63", display:"block", marginBottom:5 }}>Category</label>
             <select value={form.category} onChange={e=>set("category",e.target.value as ProductFormData["category"])}
@@ -336,6 +413,7 @@ export function ProductForm({ initial={}, onSubmit, submitLabel, loading }: { in
           .pf-grid2 { grid-template-columns:1fr !important; }
           .pf-grid4 { grid-template-columns:1fr 1fr !important; }
           .pf-grid3 { grid-template-columns:1fr !important; }
+          .pf-variant-row { grid-template-columns:1fr 1fr !important; }
         }
       `}</style>
     </form>

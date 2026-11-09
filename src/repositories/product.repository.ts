@@ -64,6 +64,7 @@ function mapVariant(
     compareAtPrice: row.compare_at_price != null ? Number(row.compare_at_price) : null,
     isDefault: row.is_default,
     isActive: row.is_active,
+    position: row.position,
     availableQuantity: inventory?.available_quantity ?? 0,
     allowBackorder: inventory?.allow_backorder ?? false,
   };
@@ -454,49 +455,40 @@ export class ProductRepository extends BaseRepository {
 
     // 2. Replace or update variants if provided
     if (variants !== undefined && variants.length > 0) {
-      const defaultVariantInput = variants.find((v) => v.isDefault) ?? variants[0];
-      const { data: existingDefault } = await this.anyDb
-        .from('product_variants')
-        .select('id')
-        .eq('product_id', id)
-        .eq('is_default', true)
-        .maybeSingle();
-
-      if (existingDefault) {
-        const { error: variantError } = await this.anyDb
-          .from('product_variants')
-          .update({
-            sku: defaultVariantInput.sku,
-            size: defaultVariantInput.size,
-            concentration: defaultVariantInput.concentration ?? null,
-            price: defaultVariantInput.price,
-            compare_at_price: defaultVariantInput.compareAtPrice ?? null,
-            is_active: defaultVariantInput.isActive ?? true,
-          })
-          .eq('id', existingDefault.id);
-
-        if (variantError) throw toWaqarError(variantError, 'ProductRepository.update - variants');
-      } else {
-        const { data: inserted, error: insertError } = await this.anyDb
-          .from('product_variants')
-          .insert({
-            product_id: id,
-            sku: defaultVariantInput.sku,
-            size: defaultVariantInput.size,
-            concentration: defaultVariantInput.concentration ?? null,
-            price: defaultVariantInput.price,
-            compare_at_price: defaultVariantInput.compareAtPrice ?? null,
-            is_default: true,
-            position: 0,
-            is_active: defaultVariantInput.isActive ?? true,
-          })
-          .select('id')
-          .single();
-
-        if (insertError || !inserted) {
-          throw toWaqarError(insertError, 'ProductRepository.update - variants insert');
+      const { data: existingRows, error: existingError } = await this.anyDb
+        .from('product_variants').select('id').eq('product_id', id);
+      if (existingError) throw toWaqarError(existingError, 'ProductRepository.update - load variants');
+      const existingIds = new Set<string>(((existingRows ?? []) as Array<{ id: string }>).map((row) => row.id));
+      // Clear first so the unique default-variant index remains valid during a switch.
+      const { error: clearDefaultError } = await this.anyDb.from('product_variants')
+        .update({ is_default: false }).eq('product_id', id);
+      if (clearDefaultError) throw toWaqarError(clearDefaultError, 'ProductRepository.update - clear default');
+      const retainedIds: string[] = [];
+      for (const [position, variant] of variants.entries()) {
+        const values = {
+          sku: variant.sku, size: variant.size, concentration: variant.concentration ?? null,
+          price: variant.price, compare_at_price: variant.compareAtPrice ?? null,
+          is_default: variant.isActive !== false && Boolean(variant.isDefault),
+          is_active: variant.isActive ?? true, position: variant.position ?? position,
+        };
+        if (variant.id && existingIds.has(variant.id)) {
+          const { error } = await this.anyDb.from('product_variants').update(values)
+            .eq('id', variant.id).eq('product_id', id);
+          if (error) throw toWaqarError(error, 'ProductRepository.update - variants');
+          retainedIds.push(variant.id);
+        } else {
+          const { data: inserted, error } = await this.anyDb.from('product_variants')
+            .insert({ ...values, product_id: id }).select('id').single();
+          if (error || !inserted) throw toWaqarError(error, 'ProductRepository.update - variants insert');
+          retainedIds.push(String(inserted.id));
+          await this.upsertInventory(inserted.id, 0);
         }
-        await this.upsertInventory(inserted.id, 0);
+      }
+      const removedIds = [...existingIds].filter((variantId) => !retainedIds.includes(variantId));
+      if (removedIds.length) {
+        const { error } = await this.anyDb.from('product_variants')
+          .update({ is_active: false, is_default: false }).in('id', removedIds).eq('product_id', id);
+        if (error) throw toWaqarError(error, 'ProductRepository.update - deactivate removed variants');
       }
     }
     if (images !== undefined) {
@@ -611,7 +603,7 @@ export class ProductRepository extends BaseRepository {
     const [variantResult, imageResult, noteResult, tagResult] = await Promise.all([
       this.db.from('product_variants')
         .select('id, product_id, sku, size, concentration, price, compare_at_price, is_default, is_active, position, inventory(stock_quantity, reserved_quantity, allow_backorder)')
-        .eq('product_id', productId).eq('is_active', true).order('position'),
+        .eq('product_id', productId).order('position'),
       this.db.from('product_images')
         .select('id, product_id, url, alt_text, position, cloudinary_id, created_at')
         .eq('product_id', productId).order('position'),

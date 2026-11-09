@@ -29,7 +29,7 @@ function getCachedStorefrontCatalogPage(page: number) {
       const supabase = createPublicClient();
       const { data, error } = await supabase
         .from('storefront_products')
-        .select('id, slug, name, subtitle, category_slug, default_variant_price, base_price, compare_at_price, default_variant_size, primary_image_url, description, is_best_seller, is_new, is_featured, rating, review_count, available_quantity, allow_backorder')
+        .select('id, slug, name, subtitle, category_slug, default_variant_id, default_variant_sku, default_variant_price, base_price, compare_at_price, default_variant_size, primary_image_url, description, is_best_seller, is_new, is_featured, rating, review_count, available_quantity, allow_backorder')
         .order('created_at', { ascending: false })
         .range(page * CATALOG_PAGE_SIZE, (page + 1) * CATALOG_PAGE_SIZE - 1);
 
@@ -42,7 +42,7 @@ function getCachedStorefrontCatalogPage(page: number) {
         return product;
       });
     },
-    ['storefront-catalog-page-v2', String(CATALOG_PAGE_SIZE), String(page)],
+    ['storefront-catalog-page-v3', String(CATALOG_PAGE_SIZE), String(page)],
     { tags: ['storefront-catalog'], revalidate: 60 },
   );
 }
@@ -135,7 +135,7 @@ const getCachedProductBySlug = unstable_cache(
       throw error;
     }
   },
-  ['storefront-product-detail-v1'],
+  ['storefront-product-detail-v2'],
   { tags: ['storefront-catalog'], revalidate: 60 },
 );
 

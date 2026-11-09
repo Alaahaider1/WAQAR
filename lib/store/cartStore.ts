@@ -1,18 +1,26 @@
 import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
-import type { Product } from "@/lib/data/products";
+import type { Product, ProductSizeVariant } from "@/lib/data/products";
 
 /** The complete product is deliberately never persisted. */
 export type CartItem = {
   productId: string;
+  variantId?: string;
+  productName?: string;
+  variantSize?: string;
+  unitPrice?: number;
   quantity: number;
 };
 
+export function getCartItemKey(item: Pick<CartItem, "productId" | "variantId">): string {
+  return item.variantId ? `${item.productId}:${item.variantId}` : item.productId;
+}
+
 type CartStore = {
   items: CartItem[];
-  addItem: (product: Pick<Product, "id" | "databaseId">, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addItem: (product: Product, variantOrQuantity?: ProductSizeVariant | number, quantity?: number) => void;
+  removeItem: (cartItemKey: string) => void;
+  updateQuantity: (cartItemKey: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: () => number;
 };
@@ -67,6 +75,10 @@ const migrateCart = (persistedState: unknown): PersistedCartState => {
       if (!item || typeof item !== "object") return [];
       const legacyItem = item as {
         productId?: unknown;
+        variantId?: unknown;
+        productName?: unknown;
+        variantSize?: unknown;
+        unitPrice?: unknown;
         quantity?: unknown;
         product?: { id?: unknown };
       };
@@ -74,7 +86,14 @@ const migrateCart = (persistedState: unknown): PersistedCartState => {
       const quantity = Number(legacyItem.quantity);
 
       return typeof productId === "string" && productId && Number.isFinite(quantity) && quantity > 0
-        ? [{ productId, quantity: Math.floor(quantity) }]
+        ? [{
+          productId,
+          ...(typeof legacyItem.variantId === "string" ? { variantId: legacyItem.variantId } : {}),
+          ...(typeof legacyItem.productName === "string" ? { productName: legacyItem.productName } : {}),
+          ...(typeof legacyItem.variantSize === "string" ? { variantSize: legacyItem.variantSize } : {}),
+          ...(typeof legacyItem.unitPrice === "number" && Number.isFinite(legacyItem.unitPrice) ? { unitPrice: legacyItem.unitPrice } : {}),
+          quantity: Math.floor(quantity),
+        }]
         : [];
     }),
   };
@@ -85,34 +104,55 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
 
-      addItem: (product, quantity = 1) => {
+      addItem: (product, variantOrQuantity, requestedQuantity = 1) => {
+        const variant = typeof variantOrQuantity === "object"
+          ? variantOrQuantity
+          : Array.isArray(product.variants)
+            ? product.variants.find((availableVariant) => availableVariant.isDefault)
+            : undefined;
+        const quantity = typeof variantOrQuantity === "number" ? variantOrQuantity : requestedQuantity;
         if (!UUID_PATTERN.test(product.databaseId)) return;
         if (!Number.isFinite(quantity) || quantity < 1) return;
+        if (variant && (!UUID_PATTERN.test(variant.id) || !Array.isArray(product.variants) || !product.variants.some((availableVariant) => availableVariant.id === variant.id))) return;
+        const unitPrice = variant && Number.isFinite(variant.price) && variant.price > 0
+          ? variant.price
+          : null;
+        if (variant && unitPrice === null) return;
         set((state) => {
+          if (!variant) {
+            const existingLegacyItem = state.items.find((item) => item.productId === product.databaseId || item.productId === product.id);
+            if (existingLegacyItem) {
+              return { items: state.items.map((item) => item === existingLegacyItem
+                ? { ...item, productId: product.databaseId, quantity: item.quantity + Math.floor(quantity) }
+                : item) };
+            }
+            return { items: [...state.items, { productId: product.databaseId, quantity: Math.floor(quantity) }] };
+          }
           const existing = state.items.find((item) =>
-            item.productId === product.databaseId || item.productId === product.id
+            item.productId === product.databaseId &&
+            (item.variantId === variant.id || (!item.variantId && product.defaultVariantId === variant.id))
           );
           if (existing) {
             return {
               items: state.items.map((item) =>
-                item.productId === product.databaseId || item.productId === product.id
-                  ? { ...item, productId: product.databaseId, quantity: item.quantity + Math.floor(quantity) }
+                item === existing
+                  ? { productId: product.databaseId, variantId: variant.id, productName: product.name, variantSize: variant.size, unitPrice: unitPrice!, quantity: item.quantity + Math.floor(quantity) }
                   : item
               ),
             };
           }
-          return { items: [...state.items, { productId: product.databaseId, quantity: Math.floor(quantity) }] };
+          return { items: [...state.items, { productId: product.databaseId, variantId: variant.id, productName: product.name, variantSize: variant.size, unitPrice: unitPrice!, quantity: Math.floor(quantity) }] };
         });
       },
 
-      removeItem: (productId) =>
-        set((state) => ({ items: state.items.filter((item) => item.productId !== productId) })),
+      removeItem: (itemKey) =>
+        set((state) => ({ items: state.items.filter((item) => getCartItemKey(item) !== itemKey) })),
 
-      updateQuantity: (productId, quantity) => {
-        if (quantity < 1) return get().removeItem(productId);
+      updateQuantity: (itemKey, quantity) => {
+        if (quantity < 1) return get().removeItem(itemKey);
         set((state) => ({
           items: state.items.map((item) =>
-            item.productId === productId ? { ...item, quantity: Math.floor(quantity) } : item
+            getCartItemKey(item) === itemKey ? { ...item, quantity: Math.floor(quantity) } : item
           ),
         }));
       },
@@ -122,11 +162,9 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: "storefront-cart",
-      version: 2,
+      version: 3,
       storage,
-      partialize: (state): PersistedCartState => ({
-        items: state.items.map(({ productId, quantity }) => ({ productId, quantity })),
-      }),
+      partialize: (state): PersistedCartState => ({ items: state.items }),
       migrate: migrateCart,
     }
   )

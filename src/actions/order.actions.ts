@@ -53,7 +53,7 @@ export async function placeOrderAction(
       p_zip: input.zip,
       p_country: input.country,
       p_payment_method: input.paymentMethod,
-      p_items: input.items,
+      p_items: input.items.map(({ id, variantId, quantity }) => ({ id, variant_id: variantId, quantity })),
       p_payload_fingerprint: payloadFingerprint,
     });
 

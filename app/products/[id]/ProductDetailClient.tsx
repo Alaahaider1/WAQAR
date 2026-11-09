@@ -34,20 +34,29 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const related = getRelated(product.id, 4);
   const addItem = useCartStore((s) => s.addItem);
   const router = useRouter();
+  const productVariants = Array.isArray(product.variants) ? product.variants : [];
   const [qty, setQty] = useState(1);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(productVariants.find((variant) => variant.isDefault)?.id ?? null);
   const [added, setAdded] = useState(false);
   const buyingNow = useRef(false);
+  const selectedVariant = productVariants.find((variant) => variant.id === selectedVariantId) ?? null;
+  const selectedPrice = selectedVariant && Number.isFinite(selectedVariant.price) && selectedVariant.price > 0
+    ? selectedVariant.price
+    : null;
 
   const handleAdd = () => {
-    addItem(product, qty);
+    if (selectedVariant && selectedPrice !== null) addItem(product, selectedVariant, qty);
+    else if (productVariants.length === 0) addItem(product, qty);
+    else return;
     setAdded(true);
     setTimeout(() => setAdded(false), 2200);
   };
 
   const handleBuyNow = () => {
-    if (buyingNow.current) return;
+    if (buyingNow.current || (productVariants.length > 0 && (!selectedVariant || selectedPrice === null))) return;
     buyingNow.current = true;
-    addItem(product, qty);
+    if (selectedVariant && selectedPrice !== null) addItem(product, selectedVariant, qty);
+    else addItem(product, qty);
     router.push("/checkout");
   };
 
@@ -99,7 +108,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 {product.name}
               </h1>
               <p className="product-detail-copy" style={{ ...S.mono, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#6B6B63", marginBottom: 16 }}>
-                {product.subtitle} · {product.size}
+                {product.subtitle}
               </p>
 
               {/* Rating */}
@@ -115,17 +124,29 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               {/* Gold rule */}
               <div style={{ width: "100%", height: 1, backgroundColor: "#EDE8DC", marginBottom: 24 }} />
 
+              {/* Available Sizes */}
+              {productVariants.length > 0 && (
+                <fieldset style={{ width:"100%", minWidth:0, boxSizing:"border-box", border:0, padding:0, margin:"0 0 20px" }}>
+                  <legend style={{ ...S.mono, fontSize:9, letterSpacing:"0.2em", textTransform:"uppercase", color:"#6B6B63", marginBottom:10 }}>Bottle Size</legend>
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:8, minWidth:0 }}>
+                    {productVariants.map((variant) => {
+                      const selected = selectedVariantId === variant.id;
+                      const bottleSize = variant.size.match(/^\s*([0-9]+(?:\.[0-9]+)?)\s*(?:ml)?\s*$/i)?.[1];
+                      const sizeLabel = bottleSize ? `${bottleSize} ML` : variant.size.trim().toUpperCase();
+                      return (
+                        <button key={variant.id} type="button" aria-pressed={selected} aria-label={`${sizeLabel} bottle size`} onClick={()=>{ setSelectedVariantId(variant.id); setAdded(false); }}
+                          style={{ minWidth:80, maxWidth:"100%", padding:"11px 14px", border:`1px solid ${selected?"#B8965A":"#EDE8DC"}`, backgroundColor:selected?"rgba(184,150,90,0.1)":"#FAFAF7", color:selected?"#1A1A18":"#6B6B63", cursor:"pointer", ...S.mono, fontSize:10, letterSpacing:"0.08em", textTransform:"uppercase", transition:"all 0.2s" }}>
+                          {sizeLabel}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+              )}
+
               {/* Price */}
               <div className="product-price-row" style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 16 }}>
-                <span style={{ ...S.display, fontSize: 28, fontWeight: 300, color: "#1A1A18" }}>{formatPrice(product.price)}</span>
-                {product.originalPrice && (
-                  <span style={{ ...S.mono, fontSize: 14, color: "#6B6B63", textDecoration: "line-through" }}>{formatPrice(product.originalPrice)}</span>
-                )}
-                {product.originalPrice && (
-                  <span style={{ ...S.mono, fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "#B8965A" }}>
-                    Save {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-                  </span>
-                )}
+                <span style={{ ...S.display, fontSize: 28, fontWeight: 300, color: "#1A1A18" }}>{productVariants.length > 0 ? selectedVariant ? selectedPrice === null ? "Unavailable size" : formatPrice(selectedPrice) : "Select a size" : formatPrice(product.price)}</span>
               </div>
 
               {/* Description */}
@@ -141,13 +162,14 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 <QuantitySelector value={qty} onChange={setQty} />
                 <button
                   onClick={handleAdd}
+                  disabled={productVariants.length > 0 && (!selectedVariant || selectedPrice === null)}
                   className="product-add-button"
                   style={{
                     flex: 1, minWidth: 180, display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
                     backgroundColor: added ? "#B8965A" : "#1A1A18",
-                    color: "#FAFAF7", border: "none", cursor: "pointer",
+                    color: "#FAFAF7", border: "none", cursor: productVariants.length === 0 || (!!selectedVariant && selectedPrice !== null) ? "pointer" : "not-allowed",
                     ...S.mono, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase",
-                    padding: "14px 24px", transition: "background-color 0.3s",
+                    padding: "14px 24px", transition: "background-color 0.3s", opacity: productVariants.length === 0 || (!!selectedVariant && selectedPrice !== null) ? 1 : 0.5,
                   }}
                 >
                   <AnimatePresence mode="wait">
@@ -165,12 +187,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 <button
                   type="button"
                   onClick={handleBuyNow}
+                  disabled={productVariants.length > 0 && (!selectedVariant || selectedPrice === null)}
                   className="product-buy-button"
                   style={{
                     flex: 1, minWidth: 180, display: "flex", alignItems: "center", justifyContent: "center",
-                    backgroundColor: "#B8965A", color: "#FAFAF7", border: "none", cursor: "pointer",
+                    backgroundColor: "#B8965A", color: "#FAFAF7", border: "none", cursor: productVariants.length === 0 || (!!selectedVariant && selectedPrice !== null) ? "pointer" : "not-allowed",
                     ...S.mono, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase",
-                    padding: "14px 24px", transition: "background-color 0.3s",
+                    padding: "14px 24px", transition: "background-color 0.3s", opacity: productVariants.length === 0 || (!!selectedVariant && selectedPrice !== null) ? 1 : 0.5,
                   }}
                 >
                   Buy Now

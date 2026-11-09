@@ -70,7 +70,17 @@ export function CheckoutClient() {
   ]));
   const items = storedItems.flatMap((item) => {
     const product = productsById.get(item.productId);
-    return product ? [{ product, quantity: item.quantity }] : [];
+    if (!product) return [];
+    const variants = Array.isArray(product.variants) ? product.variants : [];
+    const variant = item.variantId
+      ? variants.find((candidate) => candidate.id === item.variantId) ?? (
+        item.variantSize && typeof item.unitPrice === "number"
+          ? { id: item.variantId, sku: "", size: item.variantSize, price: item.unitPrice, compareAtPrice: null, isDefault: false, availableQuantity: 0, allowBackorder: false }
+          : undefined
+      )
+      : variants.find((candidate) => candidate.isDefault);
+    const selectedPrice = variant && Number.isFinite(variant.price) && variant.price > 0 ? variant.price : null;
+    return [{ product, variant, quantity: item.quantity, size: variant?.size ?? item.variantSize ?? "Unavailable size", price: selectedPrice ?? item.unitPrice ?? 0 }];
   });
   const router = useRouter();
   const [values, setValues] = useState<Record<string, string>>({});
@@ -84,7 +94,7 @@ export function CheckoutClient() {
   const checkoutAttemptId = useRef<string | null>(null);
   const checkoutAttemptFingerprint = useRef<string | null>(null);
 
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = SHIPPING_FEE;
   const total = subtotal + shipping;
 
@@ -111,7 +121,10 @@ export function CheckoutClient() {
       return;
     }
 
-    if (submitting.current || !validate()) return;
+    if (submitting.current || items.some((item) => !item.variant) || !validate()) {
+      if (items.some((item) => !item.variant)) setSubmitError("One or more selected sizes are no longer available. Return to your cart and update it.");
+      return;
+    }
 
     submitting.current = true;
     setLoading(true);
@@ -129,7 +142,7 @@ export function CheckoutClient() {
         zip: values.zip ?? "",
         country: values.country?.trim() ?? "",
         payment,
-        items: items.map((item) => [item.product.databaseId, item.quantity] as const).sort(([a], [b]) => a.localeCompare(b)),
+        items: items.map((item) => [item.product.databaseId, item.variant!.id, item.quantity] as const).sort(([a, av], [b, bv]) => a.localeCompare(b) || av.localeCompare(bv)),
       });
       let storage: Storage | null = null;
       try { storage = window.sessionStorage; } catch { /* Storage may be disabled by the browser. */ }
@@ -159,6 +172,7 @@ export function CheckoutClient() {
         paymentMethod: payment,
         items: items.map((item) => ({
           id: item.product.databaseId,
+          variantId: item.variant!.id,
           quantity: item.quantity,
         })),
       });
@@ -505,16 +519,16 @@ export function CheckoutClient() {
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25 }} style={{ overflow: "hidden" }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 20 }}>
                       {items.map((item) => (
-                        <div key={item.product.id} style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                        <div key={`${item.product.id}:${item.variant?.id ?? item.size}`} style={{ display: "flex", gap: 12, alignItems: "center" }}>
                           <div style={{ position: "relative", width: 52, flexShrink: 0 }}>
                             <img src={item.product.image} alt={item.product.name} style={{ display: "block", width: "100%", height: "auto" }} />
                             <span style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", backgroundColor: "#1A1A18", color: "#FAFAF7", ...S.mono, fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center" }}>{item.quantity}</span>
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{ ...S.body, fontSize: 12, fontWeight: 500, color: "#1A1A18", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.product.name}</p>
-                            <p style={{ ...S.mono, fontSize: 9, color: "#6B6B63", margin: 0 }}>{item.product.size}</p>
+                            <p style={{ ...S.mono, fontSize: 9, color: "#6B6B63", margin: 0 }}>{item.size}</p>
                           </div>
-                          <span style={{ ...S.mono, fontSize: 12, color: "#1A1A18", flexShrink: 0 }}>{formatPrice(item.product.price * item.quantity)}</span>
+                          <span style={{ ...S.mono, fontSize: 12, color: "#1A1A18", flexShrink: 0 }}>{formatPrice(item.price * item.quantity)}</span>
                         </div>
                       ))}
                     </div>
