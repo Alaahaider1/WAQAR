@@ -6,32 +6,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GoldDivider } from "@/components/ui/GoldDivider";
 import { FadeIn } from "@/components/ui/FadeIn";
-
-const faqs = [
-  {
-    q: "How long does a fragrance last on skin?",
-    a: "Our Eau de Parfum concentrations typically last 8–12 hours on skin. Pulse points — wrists, neck, inner elbows — maximise projection and longevity. Extrait de Parfum formulations can last up to 24 hours.",
-  },
-  {
-    q: "Can I modify or cancel my order after placing it?",
-    a: "We understand that plans can change. You may request a modification or cancellation before your order has been shipped. Once your order has been dispatched, changes may no longer be possible. Please contact our customer service team as soon as possible, and we'll do our best to assist you.",
-  },
-  {
-    q: " What if my order arrives damaged?",
-    a:"Your experience matters to us. If your order arrives damaged, please photograph the damage and contact our customer service team within hours of delivery We'll review the issue and arrange a replacement or a full refund, including shipping costs, in accordance with our damaged-order policy.Customer Service: 01153784455",
-  },
-  {
-    q: " Are your perfumes safe for the skin?",
-    a:"Our fragrances are crafted using perfumery ingredients, including 96% ethyl alcohol. As with any fragranced product, we recommend reviewing the ingredients and testing a small amount on your skin before regular use. If irritation occurs, discontinue use.",
-  },
-  {
-    q: " Can you help me choose a fragrance for a specific occasion??",
-    a:"Absolutely. Whether you're looking for an everyday signature scent, something refined for the office, a fresh fragrance for university, or a captivating scent for a special evening, we're here to help you find the perfect match.",
-  },
-];
+import { featuredFAQs } from "@/lib/data/faqs";
 
 export function FAQPreview() {
-  const [open, setOpen] = useState<number | null>(null);
+  const [open, setOpen] = useState<string | null>(null);
 
   return (
     <section style={{ backgroundColor: "#FAFAF7" }}>
@@ -70,22 +48,23 @@ export function FAQPreview() {
 
           {/* Right: accordion */}
           <FadeIn direction="right" delay={0.15}>
-            <div style={{ borderTop: "1px solid #EDE8DC" }}>
-              {faqs.map((faq, i) => (
-                <div key={i} style={{ borderBottom: "1px solid #EDE8DC" }}>
+            <div style={{ borderTop: "1px solid #EDE8DC" }} dir="rtl">
+              {featuredFAQs.map((faq) => (
+                <div key={faq.id} style={{ borderBottom: "1px solid #EDE8DC" }}>
                   <button
-                    onClick={() => setOpen(open === i ? null : i)}
+                    onClick={() => setOpen(open === faq.id ? null : faq.id)}
+                    aria-expanded={open === faq.id}
                     style={{
                       width: "100%", display: "flex", alignItems: "flex-start",
                       justifyContent: "space-between", gap: 16, padding: "20px 0",
-                      background: "none", border: "none", cursor: "pointer", textAlign: "left",
+                      background: "none", border: "none", cursor: "pointer", textAlign: "right",
                     }}
                   >
                     <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 14, fontWeight: 500, color: "#1A1A18", lineHeight: 1.4 }}>
-                      {faq.q}
+                      {faq.question}
                     </span>
                     <motion.div
-                      animate={{ rotate: open === i ? 45 : 0 }}
+                      animate={{ rotate: open === faq.id ? 45 : 0 }}
                       transition={{ duration: 0.22 }}
                       style={{ flexShrink: 0, marginTop: 2 }}
                     >
@@ -93,7 +72,7 @@ export function FAQPreview() {
                     </motion.div>
                   </button>
                   <AnimatePresence>
-                    {open === i && (
+                    {open === faq.id && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
@@ -101,8 +80,8 @@ export function FAQPreview() {
                         transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
                         style={{ overflow: "hidden" }}
                       >
-                        <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 14, color: "#6B6B63", lineHeight: 1.8, paddingBottom: 20, paddingRight: 32 }}>
-                          {faq.a}
+                        <p dir="rtl" style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 14, color: "#6B6B63", lineHeight: 1.8, paddingBottom: 20, paddingRight: 32, textAlign: "right", whiteSpace: "pre-line" }}>
+                          {faq.answer}
                         </p>
                       </motion.div>
                     )}

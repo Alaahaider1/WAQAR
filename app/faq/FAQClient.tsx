@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Search, Plus, X, ArrowRight } from "lucide-react";
-import { faqs, faqCategories } from "@/lib/data/faqs";
+import { faqs, faqCategories, featuredFAQs, type FAQ } from "@/lib/data/faqs";
 import { GoldDivider } from "@/components/ui/GoldDivider";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/FadeIn";
 
@@ -26,7 +26,7 @@ export function FAQClient() {
       list = list.filter((f) => f.category === activeCategory);
     }
     if (query.trim()) {
-      const q = query.toLowerCase();
+      const q = query.trim().toLowerCase();
       list = list.filter(
         (f) =>
           f.question.toLowerCase().includes(q) ||
@@ -35,6 +35,68 @@ export function FAQClient() {
     }
     return list;
   }, [query, activeCategory]);
+
+  const filteredFeatured = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return featuredFAQs;
+
+    return featuredFAQs.filter(
+      (faq) =>
+        faq.question.toLowerCase().includes(q) ||
+        faq.answer.toLowerCase().includes(q)
+    );
+  }, [query]);
+
+  const renderFAQItem = (faq: FAQ, showCategory: boolean) => (
+    <StaggerItem key={faq.id}>
+      <div style={{ borderBottom: "1px solid #EDE8DC" }}>
+        <button
+          onClick={() => setOpenId(openId === faq.id ? null : faq.id)}
+          aria-expanded={openId === faq.id}
+          style={{
+            width: "100%", display: "flex", alignItems: "flex-start",
+            justifyContent: "space-between", gap: 20,
+            padding: "20px 0", background: "none", border: "none",
+            cursor: "pointer", textAlign: "right",
+          }}
+        >
+          <div style={{ flex: 1 }} dir="rtl">
+            {showCategory && activeCategory === "all" && !query && (
+              <span style={{ ...S.mono, fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", color: "#B8965A", display: "block", marginBottom: 4 }}>
+                {faqCategories.find((c) => c.id === faq.category)?.label}
+              </span>
+            )}
+            <p style={{ ...S.body, fontSize: 15, fontWeight: 500, color: "#1A1A18", margin: 0, lineHeight: 1.6 }}>
+              {query.trim() ? highlightText(faq.question, query) : faq.question}
+            </p>
+          </div>
+          <motion.div
+            animate={{ rotate: openId === faq.id ? 45 : 0 }}
+            transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+            style={{ flexShrink: 0, marginTop: 2 }}
+          >
+            <Plus size={16} strokeWidth={1.5} style={{ color: "#B8965A" }} />
+          </motion.div>
+        </button>
+
+        <AnimatePresence>
+          {openId === faq.id && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
+              style={{ overflow: "hidden" }}
+            >
+              <p dir="rtl" style={{ ...S.body, fontSize: 14, color: "#6B6B63", lineHeight: 1.85, paddingBottom: 22, paddingRight: 40, margin: 0, textAlign: "right", whiteSpace: "pre-line" }}>
+                {query.trim() ? highlightText(faq.answer, query) : faq.answer}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </StaggerItem>
+  );
 
   // Reset open item when filter changes
   const handleCategory = (id: string) => {
@@ -106,10 +168,21 @@ export function FAQClient() {
           </div>
           {query && (
             <p style={{ ...S.mono, fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "#6B6B63", marginTop: 10, textAlign: "center" }}>
-              {filtered.length} {filtered.length === 1 ? "result" : "results"} for &ldquo;{query}&rdquo;
+              {filtered.length + filteredFeatured.length} {(filtered.length + filteredFeatured.length) === 1 ? "result" : "results"} for &ldquo;{query}&rdquo;
             </p>
           )}
         </FadeIn>
+
+        {filteredFeatured.length > 0 && (
+          <section aria-label="الأسئلة الشائعة" dir="rtl" style={{ marginBottom: 52 }}>
+            <p style={{ ...S.mono, fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "#6B6B63", marginBottom: 14, textAlign: "right" }}>
+              الأسئلة الشائعة
+            </p>
+            <StaggerContainer style={{ borderTop: "1px solid #EDE8DC" }}>
+              {filteredFeatured.map((faq) => renderFAQItem(faq, false))}
+            </StaggerContainer>
+          </section>
+        )}
 
         <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 56, alignItems: "flex-start" }} className="faq-layout">
 
@@ -121,7 +194,7 @@ export function FAQClient() {
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {faqCategories.map((cat) => {
-                  const count = cat.id === "all" ? faqs.length : faqs.filter((f) => f.category === cat.id).length;
+                  const count = cat.id === "all" ? faqs.length + featuredFAQs.length : faqs.filter((f) => f.category === cat.id).length;
                   const active = activeCategory === cat.id;
                   return (
                     <button
@@ -190,7 +263,7 @@ export function FAQClient() {
             </div>
 
             <AnimatePresence mode="wait">
-              {filtered.length === 0 ? (
+              {filtered.length + filteredFeatured.length === 0 ? (
                 /* Empty state */
                 <motion.div
                   key="empty"
@@ -223,67 +296,13 @@ export function FAQClient() {
                   transition={{ duration: 0.25 }}
                 >
                   <StaggerContainer style={{ borderTop: "1px solid #EDE8DC" }}>
-                    {filtered.map((faq, i) => (
-                      <StaggerItem key={faq.id}>
-                        <div style={{ borderBottom: "1px solid #EDE8DC" }}>
-                          <button
-                            onClick={() => setOpenId(openId === faq.id ? null : faq.id)}
-                            style={{
-                              width: "100%", display: "flex", alignItems: "flex-start",
-                              justifyContent: "space-between", gap: 20,
-                              padding: "20px 0", background: "none", border: "none",
-                              cursor: "pointer", textAlign: "left",
-                            }}
-                          >
-                            <div style={{ flex: 1 }}>
-                              {/* Category tag if "all" selected */}
-                              {activeCategory === "all" && !query && (
-                                <span style={{ ...S.mono, fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", color: "#B8965A", display: "block", marginBottom: 4 }}>
-                                  {faqCategories.find((c) => c.id === faq.category)?.label}
-                                </span>
-                              )}
-                              {/* Highlight matching query */}
-                              <p style={{ ...S.body, fontSize: 15, fontWeight: 500, color: "#1A1A18", margin: 0, lineHeight: 1.45 }}>
-                                {query.trim()
-                                  ? highlightText(faq.question, query)
-                                  : faq.question}
-                              </p>
-                            </div>
-                            <motion.div
-                              animate={{ rotate: openId === faq.id ? 45 : 0 }}
-                              transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-                              style={{ flexShrink: 0, marginTop: 2 }}
-                            >
-                              <Plus size={16} strokeWidth={1.5} style={{ color: "#B8965A" }} />
-                            </motion.div>
-                          </button>
-
-                          <AnimatePresence>
-                            {openId === faq.id && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
-                                style={{ overflow: "hidden" }}
-                              >
-                                <p style={{ ...S.body, fontSize: 14, color: "#6B6B63", lineHeight: 1.85, paddingBottom: 22, paddingRight: 40, margin: 0 }}>
-                                  {query.trim()
-                                    ? highlightText(faq.answer, query)
-                                    : faq.answer}
-                                </p>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      </StaggerItem>
-                    ))}
+                    {filtered.map((faq) => renderFAQItem(faq, true))}
                   </StaggerContainer>
 
                   {/* Result count footer */}
                   {filtered.length > 0 && (
                     <p style={{ ...S.mono, fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "#6B6B63", marginTop: 24 }}>
-                      Showing {filtered.length} of {faqs.length} questions
+                      Showing {filtered.length + filteredFeatured.length} of {faqs.length + featuredFAQs.length} questions
                     </p>
                   )}
                 </motion.div>
