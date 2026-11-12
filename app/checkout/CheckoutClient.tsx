@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,6 +10,7 @@ import { useCatalogProducts } from "@/lib/catalog/CatalogProvider";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import { GoldDivider } from "@/components/ui/GoldDivider";
 import { placeOrderAction } from "@/src/actions/order.actions";
+import { validateCouponAction } from "@/src/actions/coupon.actions";
 import { SHIPPING_FEE } from "@/src/lib/shipping";
 import {
   CHECKOUT_ATTEMPT_REUSED_MESSAGE,
@@ -62,7 +63,7 @@ function FormField({ field, value, error, onChange }: { field: Field; value: str
 }
 
 export function CheckoutClient() {
-  const { items: storedItems, clearCart } = useCartStore();
+  const { items: storedItems, clearCart, couponCode } = useCartStore();
   const catalogProducts = useCatalogProducts();
   const productsById = new Map(catalogProducts.flatMap((product) => [
     [product.databaseId, product] as const,
@@ -90,13 +91,34 @@ export function CheckoutClient() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState<number | null>(null);
+  const [couponError, setCouponError] = useState("");
   const submitting = useRef(false);
   const checkoutAttemptId = useRef<string | null>(null);
   const checkoutAttemptFingerprint = useRef<string | null>(null);
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = SHIPPING_FEE;
-  const total = subtotal + shipping;
+  const discount = couponDiscount ?? 0;
+  const total = subtotal - discount + shipping;
+
+  useEffect(() => {
+    if (!couponCode) {
+      return;
+    }
+    let active = true;
+    void validateCouponAction({ code: couponCode, subtotal }).then((result) => {
+      if (!active) return;
+      if (!result.success || !result.data) {
+        setCouponDiscount(null);
+        setCouponError(result.success ? "This coupon is no longer valid. Return to your cart to review it." : result.error || "This coupon is no longer valid. Return to your cart to review it.");
+        return;
+      }
+      setCouponDiscount(result.data.discountAmount);
+      setCouponError("");
+    });
+    return () => { active = false; };
+  }, [couponCode, subtotal]);
 
   const set = (name: string, val: string) => {
     setSubmitError("");
@@ -142,6 +164,7 @@ export function CheckoutClient() {
         zip: values.zip ?? "",
         country: values.country?.trim() ?? "",
         payment,
+        couponCode: couponCode ?? "",
         items: items.map((item) => [item.product.databaseId, item.variant!.id, item.quantity] as const).sort(([a, av], [b, bv]) => a.localeCompare(b) || av.localeCompare(bv)),
       });
       let storage: Storage | null = null;
@@ -170,6 +193,7 @@ export function CheckoutClient() {
         zip: values.zip || "",
         country: values.country || "",
         paymentMethod: payment,
+        couponCode: couponCode ?? "",
         items: items.map((item) => ({
           id: item.product.databaseId,
           variantId: item.variant!.id,
@@ -495,6 +519,11 @@ export function CheckoutClient() {
                   {submitError}
                 </p>
               )}
+              {couponError && (
+                <p role="alert" style={{ ...S.body, fontSize: 12, lineHeight: 1.6, color: "#cc4444", margin: "12px 0 0" }}>
+                  {couponError}
+                </p>
+              )}
               <p style={{ ...S.body, fontSize: 11, color: "#6B6B63", display: "flex", alignItems: "center", gap: 5, marginTop: -28 }}>
                 <Lock size={10} strokeWidth={1.5} /> SSL encrypted. Your payment information is secure.
               </p>
@@ -542,7 +571,18 @@ export function CheckoutClient() {
                   <span style={{ ...S.body, fontSize: 13, color: "#6B6B63" }}>Subtotal</span>
                   <span style={{ ...S.mono, fontSize: 13, color: "#1A1A18" }}>{formatPrice(subtotal)}</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                {couponCode && (
+                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10 }}>
+                    <span style={{ ...S.body, fontSize: 13, color: couponError ? "#cc4444" : "#B8965A" }}>
+                      {couponError ? `Coupon ${couponCode} needs attention` : `Coupon (${couponCode})`}
+                    </span>
+                    <span style={{ ...S.mono, fontSize: 13, color: couponError ? "#cc4444" : "#B8965A" }}>
+                      {couponError ? "Review coupon" : `−${formatPrice(discount)}`}
+                    </span>
+                  </div>
+                )}
+
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10 }}>
                   <span style={{ ...S.body, fontSize: 13, color: "#6B6B63" }}>Shipping</span>
                   <span style={{ ...S.mono, fontSize: 13, color: "#1A1A18" }}>{formatPrice(shipping)}</span>
                 </div>

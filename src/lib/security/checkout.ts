@@ -24,6 +24,7 @@ export const PlaceOrderSchema = z.object({
   zip: z.string().trim().max(20),
   country: z.string().trim().min(2).max(100),
   paymentMethod: z.enum(['card', 'vodafone', 'etisalat', 'orange', 'wepay', 'instapay', 'cod']),
+  couponCode: z.string().trim().max(50).optional().default(''),
   items: z.array(CheckoutItemSchema).min(1).max(50).superRefine((items, context) => {
     const seen = new Set<string>();
     for (const [index, item] of items.entries()) {

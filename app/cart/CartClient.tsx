@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Minus, Plus, X, ShoppingBag, ArrowRight, Tag, Truck, Check } from "lucide-react";
@@ -21,7 +21,7 @@ const S = {
 
 
 export function CartClient() {
-  const { items: storedItems, removeItem, updateQuantity } = useCartStore();
+  const { items: storedItems, removeItem, updateQuantity, couponCode: storedCouponCode, setCouponCode } = useCartStore();
   const catalogProducts = useCatalogProducts();
   const productsById = new Map(catalogProducts.flatMap((product) => [
     [product.databaseId, product] as const,
@@ -60,10 +60,11 @@ export function CartClient() {
     setCouponLoading(false);
 
     if (!result.success || !result.data) {
-      setCouponError("Invalid coupon code.");
+      setCouponError(result.success ? "Invalid coupon code." : result.error || "Invalid coupon code.");
       return;
     }
 
+    setCouponCode(result.data.code);
     setAppliedCoupon({
       code: result.data.code,
       discountAmount: result.data.discountAmount,
@@ -73,6 +74,32 @@ export function CartClient() {
     });
     setCoupon("");
   };
+
+  // Revalidate persisted coupon codes against the current cart subtotal.
+  useEffect(() => {
+    if (!storedCouponCode) {
+      return;
+    }
+    let active = true;
+    void validateCouponAction({ code: storedCouponCode, subtotal }).then((result) => {
+      if (!active) return;
+      if (!result.success || !result.data) {
+        setAppliedCoupon(null);
+        setCouponCode(null);
+        setCouponError(result.success ? "This coupon is no longer valid." : result.error || "This coupon is no longer valid.");
+        return;
+      }
+      setAppliedCoupon({
+        code: result.data.code,
+        discountAmount: result.data.discountAmount,
+        label: result.data.discountType === "percentage"
+          ? `${Math.round(result.data.discountValue)}% off`
+          : `${formatPrice(result.data.discountAmount)} off`,
+      });
+      setCouponError("");
+    });
+    return () => { active = false; };
+  }, [storedCouponCode, subtotal, setCouponCode]);
 
   /* ── Empty State ── */
   if (items.length === 0) {

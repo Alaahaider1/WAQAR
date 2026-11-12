@@ -82,16 +82,17 @@ export async function validateCouponAction(rawData: unknown): Promise<ActionResu
     const coupon = await new CouponRepository(db).findByCode(input.code);
 
     const now = new Date().toISOString();
-    if (coupon.status !== 'active' || (coupon.validFrom && coupon.validFrom > now) || (coupon.validUntil && coupon.validUntil < now) || coupon.minimumOrderValue > input.subtotal) {
-      throw new WaqarError('Invalid coupon code.', 'INVALID_COUPON');
+    if (coupon.status !== 'active' || (coupon.validFrom && coupon.validFrom > now) || (coupon.validUntil && coupon.validUntil <= now) || coupon.minimumOrderValue > input.subtotal || (coupon.usageLimit !== null && coupon.usageCount >= coupon.usageLimit)) {
+      throw new WaqarError('This coupon is invalid, expired, fully used, or does not meet the minimum order value.', 'INVALID_COUPON', 422);
     }
 
     const rawDiscount = coupon.discountType === 'percentage'
       ? input.subtotal * (coupon.discountValue / 100)
       : coupon.discountValue;
-    const discountAmount = coupon.discountType === 'percentage' && coupon.maximumDiscount != null
+    const cappedDiscount = coupon.discountType === 'percentage' && coupon.maximumDiscount != null
       ? Math.min(rawDiscount, coupon.maximumDiscount)
       : rawDiscount;
+    const discountAmount = Math.min(input.subtotal, Math.round(cappedDiscount * 100) / 100);
 
     return actionSuccess({
       code: coupon.code,

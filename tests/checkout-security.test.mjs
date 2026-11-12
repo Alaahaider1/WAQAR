@@ -83,6 +83,18 @@ test('checkout rejects unavailable products and invalid quantities', () => {
   assert.equal(PlaceOrderSchema.safeParse({ ...request, checkoutAttemptId: 'invalid' }).success, false);
 });
 
+test('checkout accepts only the coupon code and strips any forged browser discount or total', () => {
+  const parsed = PlaceOrderSchema.parse({
+    ...request,
+    couponCode: ' save50 ',
+    discountAmount: 999999,
+    total: 1,
+  });
+  assert.equal(parsed.couponCode, 'save50');
+  assert.equal('discountAmount' in parsed, false);
+  assert.equal('total' in parsed, false);
+});
+
 test('size parser accepts supported bottle and evidenced bundle labels, rejects invalid values', () => {
   for (const [label, expected] of [['30ml', 30], ['30 ML', 30], ['30', 30], ['100ml', 100], ['2 x 30ml', 60], ['3 \u00d7 30ml', 90]]) {
     assert.equal(parseSizeMilliliters(label), expected);
@@ -239,6 +251,31 @@ test('selectable-size migration uses selected stored price and validates variant
   assert.doesNotMatch(sql, /create or replace view|create table|alter table/i);
 });
 
+test('checkout coupon is persisted, revalidated, priced atomically, and saved for admin details', async () => {
+  const [cart, checkout, action, migration, admin, fingerprint] = await Promise.all([
+    readFile(new URL('../lib/store/cartStore.ts', import.meta.url), 'utf8'),
+    readFile(new URL('../app/checkout/CheckoutClient.tsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/actions/order.actions.ts', import.meta.url), 'utf8'),
+    readFile(new URL('../supabase/migrations/20261112000000_checkout_coupon_pricing.sql', import.meta.url), 'utf8'),
+    readFile(new URL('../app/admin/orders/[id]/page.tsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/lib/security/checkout-fingerprint.ts', import.meta.url), 'utf8'),
+  ]);
+  assert.match(cart, /couponCode: string \| null/);
+  assert.match(cart, /partialize: \(state\): PersistedCartState => \(\{ items: state\.items, couponCode: state\.couponCode \}\)/);
+  assert.match(checkout, /validateCouponAction\(\{ code: couponCode, subtotal \}\)/);
+  assert.match(checkout, /couponCode: couponCode \?\? ""/);
+  assert.match(action, /p_coupon_code: input\.couponCode/);
+  assert.match(fingerprint, /couponCode: input\.couponCode\.trim\(\)\.toUpperCase\(\)/);
+  assert.match(migration, /for update/);
+  assert.match(migration, /v_total := v_subtotal - v_discount \+ v_shipping/);
+  assert.match(migration, /v_shipping := 80/);
+  assert.match(migration, /usage_count >= v_coupon\.usage_limit/);
+  assert.match(migration, /insert into public\.coupon_usages/);
+  assert.match(migration, /'pending', 'pending', v_subtotal, v_discount,[\s\S]*?v_shipping, 0, v_total, 'EGP', v_coupon\.id, v_coupon_code/);
+  assert.match(admin, /Coupon \{order\.couponCode\}/);
+  assert.match(admin, /order\.discountAmount/);
+});
+
 test('checkout request keeps the selected variant through the action and does not restrict non-default variants', async () => {
   const [client, action, card] = await Promise.all([
     readFile(new URL('../app/checkout/CheckoutClient.tsx', import.meta.url), 'utf8'),
@@ -267,7 +304,7 @@ test('selected variant ID survives cart hydration, quantity changes, RPC snapsho
   assert.match(cart, /variantId: variant\.id/);
   assert.match(cart, /legacyItem\.variantId/);
   assert.match(cart, /getCartItemKey\(item\) === itemKey \? \{ \.\.\.item, quantity:/);
-  assert.match(cart, /partialize: \(state\): PersistedCartState => \(\{ items: state\.items \}\)/);
+  assert.match(cart, /partialize: \(state\): PersistedCartState => \(\{ items: state\.items, couponCode: state\.couponCode \}\)/);
   assert.match(checkout, /variantId: item\.variant!\.id/);
   assert.match(action, /variant_id: variantId/);
   assert.match(migration, /v\.id = r\.variant_id/);

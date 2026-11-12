@@ -18,6 +18,8 @@ export function getCartItemKey(item: Pick<CartItem, "productId" | "variantId">):
 
 type CartStore = {
   items: CartItem[];
+  couponCode: string | null;
+  setCouponCode: (code: string | null) => void;
   addItem: (product: Product, variantOrQuantity?: ProductSizeVariant | number, quantity?: number) => void;
   removeItem: (cartItemKey: string) => void;
   updateQuantity: (cartItemKey: string, quantity: number) => void;
@@ -25,7 +27,7 @@ type CartStore = {
   totalItems: () => number;
 };
 
-type PersistedCartState = Pick<CartStore, "items">;
+type PersistedCartState = Pick<CartStore, "items" | "couponCode">;
 
 const isQuotaExceededError = (error: unknown) => {
   const storageError = error as { name?: unknown; code?: unknown };
@@ -71,6 +73,9 @@ const migrateCart = (persistedState: unknown): PersistedCartState => {
       : [];
 
   return {
+    couponCode: typeof (persistedState as { couponCode?: unknown } | null)?.couponCode === "string"
+      ? (persistedState as { couponCode: string }).couponCode
+      : null,
     items: items.flatMap((item) => {
       if (!item || typeof item !== "object") return [];
       const legacyItem = item as {
@@ -103,6 +108,8 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      couponCode: null,
+      setCouponCode: (couponCode) => set({ couponCode: couponCode?.trim().toUpperCase() || null }),
 
       addItem: (product, variantOrQuantity, requestedQuantity = 1) => {
         const variant = typeof variantOrQuantity === "object"
@@ -157,14 +164,14 @@ export const useCartStore = create<CartStore>()(
         }));
       },
 
-      clearCart: () => set({ items: [] }),
+      clearCart: () => set({ items: [], couponCode: null }),
       totalItems: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
     }),
     {
       name: "storefront-cart",
-      version: 3,
+      version: 4,
       storage,
-      partialize: (state): PersistedCartState => ({ items: state.items }),
+      partialize: (state): PersistedCartState => ({ items: state.items, couponCode: state.couponCode }),
       migrate: migrateCart,
     }
   )

@@ -111,6 +111,13 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 16, marginTop: 32 }}>
           <div style={{ backgroundColor: '#FAFAF7', border: '1px solid #EDE8DC', padding: 24 }}>
+            <SectionLabel>Order totals</SectionLabel>
+            <div style={{ display: 'grid', gap: 8, marginBottom: 22 }}>
+              <p style={{ ...S.m, fontSize: 12, color: '#6B6B63', margin: 0 }}>Subtotal: {formatPrice(order.subtotal)}</p>
+              {order.couponCode && <p style={{ ...S.m, fontSize: 12, color: '#6B6B63', margin: 0 }}>Coupon {order.couponCode}: −{formatPrice(order.discountAmount)}</p>}
+              <p style={{ ...S.m, fontSize: 12, color: '#6B6B63', margin: 0 }}>Shipping: {formatPrice(order.shippingAmount)}</p>
+              <p style={{ ...S.m, fontSize: 13, color: '#1A1A18', margin: 0 }}>Total: {formatPrice(order.total)}</p>
+            </div>
             <SectionLabel>Payment details</SectionLabel>
             <p style={{ ...S.b, fontSize: 13, color: '#1A1A18', margin: 0 }}>Payment method: {paymentData?.provider ?? 'Manual payment'}</p>
             <p style={{ ...S.m, fontSize: 12, color: '#6B6B63', margin: '8px 0 0' }}>Payment amount: {paymentData ? formatPrice(Number(paymentData.amount || 0)) : 'N/A'}</p>

@@ -17,6 +17,7 @@ export function createCheckoutPayloadFingerprint(input: ValidatedCheckout) {
     zip: input.zip,
     country: input.country,
     paymentMethod: input.paymentMethod,
+    couponCode: input.couponCode.trim().toUpperCase(),
     items: input.items
       .map(({ id, variantId, quantity }) => ({ id, variantId, quantity }))
       .sort((a, b) => a.id.localeCompare(b.id) || a.variantId.localeCompare(b.variantId)),

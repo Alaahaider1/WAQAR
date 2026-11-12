@@ -75,7 +75,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             style={{
               position: "absolute", bottom: 0, left: 0, right: 0,
               padding: "12px 0",
-              backgroundColor: added ? "#B8965A" : "rgba(26,26,24,0.88)",
+              backgroundColor: "rgba(26,26,24,0.88)",
               color: "#FAFAF7",
               fontFamily: "'DM Mono', monospace",
               fontSize: 9,
@@ -134,7 +134,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           {/* Price */}
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
             <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, color: "#1A1A18" }}>
-              {formatPrice(product.price)}
+                {product.variants?.length > 1 ? `From ${formatPrice(product.price)}` : formatPrice(product.price)}
             </span>
             {product.originalPrice && (
               <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "rgba(107,107,99,0.45)", textDecoration: "line-through" }}>

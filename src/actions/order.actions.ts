@@ -54,6 +54,7 @@ export async function placeOrderAction(
       p_country: input.country,
       p_payment_method: input.paymentMethod,
       p_items: input.items.map(({ id, variantId, quantity }) => ({ id, variant_id: variantId, quantity })),
+      p_coupon_code: input.couponCode,
       p_payload_fingerprint: payloadFingerprint,
     });
 
@@ -66,6 +67,9 @@ export async function placeOrderAction(
       }
       if (orderError.code === '22023') {
         throw new WaqarError('One or more products are no longer available. Please review your cart.', 'INVALID_CART', 422);
+      }
+      if (orderError.code === 'P0002') {
+        throw new WaqarError('This coupon is no longer valid. Please return to your cart and review your discount.', 'INVALID_COUPON', 422);
       }
       console.error('[checkout] place_guest_checkout_order RPC failed', {
         code: orderError.code,
